@@ -1,25 +1,31 @@
-## Movie Trailer Website: Getting Started
+# Movie Trailer Website: Getting Started
 
-# Project Description
+## Project Description
 In this project you will build a Movie Trailer Website where users can see your favorite movies and watch the trailers. You'll be writing server side code to store a list of movie titles, box art, poster images, and movie trailer URLs. The data will then be expressed on the web page and allow users to review the movies and watch the trailers. (Here's a hint: The data for the movies will be stored using Classes!)
 
 NOTE: Because this project is a part of the Programming Foundations with Python course, if you have successfully completed the project before, please e-mail us at fullstack-project@udacity.com
 
 You'll be learning how to write an application using object-oriented Python programming as well as how to serve HTML using a web server and how web servers receive requests, execute a block of code, and generate a response.
 
-# Project Display Example
+## Project Display Example
 ![Project Display Example](./pics/p1_display_example.png)
 
-# Getting Started
+## Getting Started
 For those who are new to the world of programming, having nothing (except your knowledge thus far) to start may feel a little overwhelming. Before we begin doing anything coding, there are several steps that you should take to make sure that you have everything downloaded in order to run your future web application.
+
 1. The Programming Foundations with Python course will help you get started, specifically Lesson 3a. Be sure to review the course notes provided in the Downloadables section of Lesson 3a, this document will be very helpful understanding how the starter code fits in with your Python Movie class.
+
 2. Make sure that you have Python downloaded on your computer. You may use Python 3, but keep in mind that we are going to be using Python 2. While this shouldn't be too problematic, Python 3 is not backwards compatible and you will be responsible to figure out any discrepancies.
+
 3. Download the file fresh_tomatoes.py which contains the open_movies_page() function that will take in your list of movies and generate an HTML file including this content, producing a website to showcase your favorite movies.
+
 4. Your task is to write a movie class in media.py. To do this, think about what the properties of a movie are that need to be encapsulated in a movie object such as movie titles, box art, poster images, and movie trailer URLs. Look at what open_movies_page() does with a list of movie objects for hints on how to design your movie class.
+
 5. Next you’ll want to write a constructor for the movie class so that you can create instances of movie.
+
 6. You can now create a list of these movie objects in entertainment_center.py by calling the constructor media.Movie() to instantiate movie objects. You’ve given movies their own custom data structure by defining the movie class and constructor, and now these objects can be stored in a list data structure. This list of movies is what the open_movies_page() function needs as input in order to build the HTML file, so you can display your website.
 
-# Project Evaluation (Rubric)
+## Project Evaluation (Rubric)
 The project will be evaluated on a Does Not Meet Specifications, Meets Specifications, and Exceeds Specifications scale. While every criteria will have a does not meet and meets category, not every criteria will have an exceeds option.
 The rubric is broken into four major categories:
 
@@ -40,6 +46,6 @@ When submitting your project, be sure to include a README file detailing how a u
 * A good example to get you started (provided by a current student on the forum) is the README file for bootstrap: https://github.com/twbs/bootstrap#quick-start
 * While this example is a bit extensive, it gives you an idea of what the purpose of a README file would be. README files are great because when there are programs that have a lot of interconnecting files or are new, README files provide instructions to other users on how to run your program.
 
-# To Submit
+## To Submit
 Once you have finished your project, go to this link here. If you have a Github account (which we recommend), connect with Github to get started. If you do not have a Github account, follow the instructions here for Mac OS X 10.0 or later, here for Windows 7, 8, or 8.1, or here for anything else. These links will help you create a Github account to submit your project.
 If you run into any trouble, send us an e-mail at fullstack-project@udacity.com, and we will be more than happy to help you.
