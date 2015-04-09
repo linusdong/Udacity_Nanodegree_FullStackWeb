@@ -1,5 +1,27 @@
 # Movie Trailer Website: Getting Started
 
+## Change log
+
+April 8th 2015, first working version, meets basic requirements
+
+##How to use the project
+1. Download all the files and make sure they are in the SAME folder
+2. Assume you have python installed. If not, you can open the html file with your browser to see the end product.
+3. Python is installed. Open python shell environment or command line terminal, go to the download folder.
+4. Execute the following, make sure all three python files are in the same place(media.py, entertainment_center.py, fresh_tomatoes.py)
+```bash
+python entertainment_center.py
+```
+5. Browser will open and enjoy!
+
+## Table of contents
+
+* [Project Description] (#project-Description "Look down")
+* [Project Display Example] (#project-display-example "Picture!")
+* [Getting Started] (#getting-started "Look down")
+* [Project Evaluation] (#project-evaluation "keep looking down")
+* [To Submit] (#to-submit "This is the bottom")
+
 ## Project Description
 In this project you will build a Movie Trailer Website where users can see your favorite movies and watch the trailers. You'll be writing server side code to store a list of movie titles, box art, poster images, and movie trailer URLs. The data will then be expressed on the web page and allow users to review the movies and watch the trailers. (Here's a hint: The data for the movies will be stored using Classes!)
 
