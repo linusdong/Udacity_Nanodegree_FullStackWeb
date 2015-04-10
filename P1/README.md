@@ -2,8 +2,8 @@
 
 ## Change log
 
-April 9th 2015, added floating tooltip that shows movie's release date,add two new instances variables(release date and main cast)
-April 8th 2015, first working version, meets basic requirements
+* April 9th 2015, added floating tooltip that shows movie's release date,add two new instances variables(release date and main cast)
+* April 8th 2015, first working version, meets basic requirements
 
 ##How to use the project
 1. Download all the files and make sure they are in the SAME folder
