@@ -2,6 +2,7 @@
 
 ## Change log
 
+April 9th 2015, added floating tooltip that shows movie's release date,add two new instances variables(release date and main cast)
 April 8th 2015, first working version, meets basic requirements
 
 ##How to use the project
@@ -9,9 +10,11 @@ April 8th 2015, first working version, meets basic requirements
 2. Assume you have python installed. If not, you can open the html file with your browser to see the end product.
 3. Python is installed. Open python shell environment or command line terminal, go to the download folder.
 4. Execute the following, make sure all three python files are in the same place(media.py, entertainment_center.py, fresh_tomatoes.py)
+
 ```bash
 python entertainment_center.py
 ```
+
 5. Browser will open and enjoy!
 
 ## Table of contents

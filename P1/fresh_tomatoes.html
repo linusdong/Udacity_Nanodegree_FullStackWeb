@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+    <link href="http://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+    <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <style type="text/css" media="screen">
         body {
             padding-top: 80px;
@@ -46,7 +48,17 @@
             width: 100%;
             left: 0;
             top: 0;
-            background-color: white;
+            background-color: black;
+        }
+        .tooltip-moving {
+            display:none;
+            position:absolute;
+            border:1px solid #333;
+            background-color:#161616;
+            border-radius:5px;
+            padding:10px;
+            color:#fff;
+            font-size:12px Arial;
         }
     </style>
     <script type="text/javascript" charset="utf-8">
@@ -58,7 +70,7 @@
         });
         // Start playing the video whenever the trailer modal is opened
         $(document).on('click', '.movie-tile', function (event) {
-            var trailerYouTubeId = $(this).attr('data-trailer-youtube-id')
+            var trailerYouTubeId = $(this).attr('data-trailer-youtube-id');
             var sourceUrl = 'http://www.youtube.com/embed/' + trailerYouTubeId + '?autoplay=1&html5=1';
             $("#trailer-video-container").empty().append($("<iframe></iframe>", {
               'id': 'trailer-video',
@@ -71,6 +83,29 @@
         $(document).ready(function () {
           $('.movie-tile').hide().first().show("fast", function showNext() {
             $(this).next("div").show("fast", showNext);
+          });
+          // Enable tooltips
+          // http://www.alessioatzeni.com/blog/simple-tooltip-with-jquery-only-text/
+          // Tooltip only Text
+          $('.movie-tile').hover(function(){
+                  var trailerYouTubeId = $(this).attr('data-trailer-youtube-id');
+                  var releaseDate = $(this).attr('release-date');
+                  // Hover over code
+                  var title = $(this).attr('title');
+                  $(this).data('tipText', title).removeAttr('title');
+                  $('<p class="tooltip-moving"></p>')
+                  .text(releaseDate)
+                  .appendTo('body')
+                  .fadeIn('slow');
+          }, function() {
+                  // Hover out code
+                  $(this).attr('title', $(this).data('tipText'));
+                  $('.tooltip-moving').remove();
+          }).mousemove(function(e) {
+                  var mousex = e.pageX + 20; //Get X coordinates
+                  var mousey = e.pageY + 10; //Get Y coordinates
+                  $('.tooltip-moving')
+                  .css({ top: mousey, left: mousex })
           });
         });
     </script>
@@ -97,49 +132,49 @@
       <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
           <div class="navbar-header">
-            <a class="navbar-brand" href="#">Linus Favourite Movie Trailers</a>
+            <a class="navbar-brand" href="#" title="Don't get rick rolled. LoL!">Linus Favourite Movie Trailers</a>
           </div>
         </div>
       </div>
     </div>
     <div class="container">
       
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="m7lrZK21AX4" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="December 7, 2001" data-trailer-youtube-id="m7lrZK21AX4" data-toggle="modal" data-target="#trailer">
     <img src="http://iv1.lisimg.com/image/175447/600full-ocean%27s-eleven-poster.jpg" width="220" height="342">
     <h2>Ocean Eleven</h2>
 </div>
 
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="yUmSVcttXnI" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="June 6, 2014" data-trailer-youtube-id="yUmSVcttXnI" data-toggle="modal" data-target="#trailer">
     <img src="http://www.joblo.com/timthumb.php?src=/posters/images/full/edge_of_tomorrow_np.jpg&w=654&zc=1&q=90" width="220" height="342">
     <h2>Edge of Tomorrow</h2>
 </div>
 
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="FpKaB5dvQ4g" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="June 14, 2002" data-trailer-youtube-id="FpKaB5dvQ4g" data-toggle="modal" data-target="#trailer">
     <img src="http://www.slantmagazine.com/assets/house/film/posterlabbournelegacy_5.jpg" width="220" height="342">
     <h2>The Bourne Identity</h2>
 </div>
 
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="VfYBKDyF-Dk" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="10 August 2007" data-trailer-youtube-id="VfYBKDyF-Dk" data-toggle="modal" data-target="#trailer">
     <img src="https://s-media-cache-ak0.pinimg.com/736x/d3/14/d4/d314d44f52b553192143cef2a2654c5f.jpg" width="220" height="342">
     <h2>Stardust</h2>
 </div>
 
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="8qnQz8kxte0" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="10 September 2006" data-trailer-youtube-id="8qnQz8kxte0" data-toggle="modal" data-target="#trailer">
     <img src="https://s-media-cache-ak0.pinimg.com/originals/a9/0d/d9/a90dd93df6a88a7a2636559bd9f395fc.jpg" width="220" height="342">
     <h2>Cashback</h2>
 </div>
 
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="DXPJqRtkDP0" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="September 21, 2001" data-trailer-youtube-id="DXPJqRtkDP0" data-toggle="modal" data-target="#trailer">
     <img src="http://image.tmdb.org/t/p/original/aD0JIpFkduApsVhj9G575VfJhiK.jpg" width="220" height="342">
     <h2>Training Day</h2>
 </div>
 
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="3Zuxjl1L6sA" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="November 22, 1995" data-trailer-youtube-id="3Zuxjl1L6sA" data-toggle="modal" data-target="#trailer">
     <img src="http://i.imgur.com/NeB2R69.jpg" width="220" height="342">
     <h2>Toy Story</h2>
 </div>
 
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="EgHI4YBXhxM" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="December 18, 2009" data-trailer-youtube-id="EgHI4YBXhxM" data-toggle="modal" data-target="#trailer">
     <img src="http://www.comicbookmovie.com/images/users/gallerypictures/6660L.jpg" width="220" height="342">
     <h2>Avatar</h2>
 </div>

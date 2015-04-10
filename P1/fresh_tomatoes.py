@@ -1,6 +1,7 @@
 import webbrowser
 import os
 import re
+
 # Styles and scripting for the page
 main_page_head = '''
 <head>
@@ -12,6 +13,8 @@ main_page_head = '''
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+    <link href="http://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+    <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <style type="text/css" media="screen">
         body {
             padding-top: 80px;
@@ -50,7 +53,17 @@ main_page_head = '''
             width: 100%;
             left: 0;
             top: 0;
-            background-color: white;
+            background-color: black;
+        }
+        .tooltip-moving {
+            display:none;
+            position:absolute;
+            border:1px solid #333;
+            background-color:#161616;
+            border-radius:5px;
+            padding:10px;
+            color:#fff;
+            font-size:12px Arial;
         }
     </style>
     <script type="text/javascript" charset="utf-8">
@@ -62,7 +75,7 @@ main_page_head = '''
         });
         // Start playing the video whenever the trailer modal is opened
         $(document).on('click', '.movie-tile', function (event) {
-            var trailerYouTubeId = $(this).attr('data-trailer-youtube-id')
+            var trailerYouTubeId = $(this).attr('data-trailer-youtube-id');
             var sourceUrl = 'http://www.youtube.com/embed/' + trailerYouTubeId + '?autoplay=1&html5=1';
             $("#trailer-video-container").empty().append($("<iframe></iframe>", {
               'id': 'trailer-video',
@@ -75,6 +88,29 @@ main_page_head = '''
         $(document).ready(function () {
           $('.movie-tile').hide().first().show("fast", function showNext() {
             $(this).next("div").show("fast", showNext);
+          });
+          // Enable tooltips
+          // http://www.alessioatzeni.com/blog/simple-tooltip-with-jquery-only-text/
+          // Tooltip only Text
+          $('.movie-tile').hover(function(){
+                  var trailerYouTubeId = $(this).attr('data-trailer-youtube-id');
+                  var releaseDate = $(this).attr('release-date');
+                  // Hover over code
+                  var title = $(this).attr('title');
+                  $(this).data('tipText', title).removeAttr('title');
+                  $('<p class="tooltip-moving"></p>')
+                  .text(releaseDate)
+                  .appendTo('body')
+                  .fadeIn('slow');
+          }, function() {
+                  // Hover out code
+                  $(this).attr('title', $(this).data('tipText'));
+                  $('.tooltip-moving').remove();
+          }).mousemove(function(e) {
+                  var mousex = e.pageX + 20; //Get X coordinates
+                  var mousey = e.pageY + 10; //Get Y coordinates
+                  $('.tooltip-moving')
+                  .css({ top: mousey, left: mousex })
           });
         });
     </script>
@@ -104,7 +140,7 @@ main_page_content = '''
       <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
           <div class="navbar-header">
-            <a class="navbar-brand" href="#">Linus Favourite Movie Trailers</a>
+            <a class="navbar-brand" href="#" title="Don't get rick rolled. LoL!">Linus Favourite Movie Trailers</a>
           </div>
         </div>
       </div>
@@ -118,7 +154,7 @@ main_page_content = '''
 
 # A single movie entry html template
 movie_tile_content = '''
-<div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
+<div class="col-md-6 col-lg-4 movie-tile text-center" release-date="{release_date}" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
     <img src="{poster_image_url}" width="220" height="342">
     <h2>{movie_title}</h2>
 </div>
@@ -137,7 +173,8 @@ def create_movie_tiles_content(movies):
         content += movie_tile_content.format(
             movie_title=movie.title,
             poster_image_url=movie.poster_image_url,
-            trailer_youtube_id=trailer_youtube_id
+            trailer_youtube_id=trailer_youtube_id,
+            release_date = movie.release_date
         )
     return content
 
