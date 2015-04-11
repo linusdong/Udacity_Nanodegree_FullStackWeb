@@ -13,15 +13,40 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
-
+    query= '''
+    delete from matches;
+    '''
+    db = connect()
+    c = db.cursor()
+    c.execute(query)
+    db.commit()
+    db.close()
 
 def deletePlayers():
     """Remove all the player records from the database."""
-
+    query= '''
+    delete from players;
+    '''
+    db = connect()
+    c = db.cursor()
+    c.execute(query)
+    db.commit()
+    db.close()
 
 def countPlayers():
     """Returns the number of players currently registered."""
-
+    query= '''
+    select count(*) as num from players order by num;
+    '''
+    db = connect()
+    c = db.cursor()
+    c.execute(query)
+    row = c.fetchone()
+    number = row[0]
+    db.commit()
+    db.close()
+    assert number >= 0 # make sure zero or positive number get returned
+    return number
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
@@ -32,13 +57,23 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    query = '''
+    insert into players (name) values(%s);
+    '''
+    db = connect()
+    c = db.cursor()
+    c.execute(query, (name,))
+    db.commit()
+    db.close() 
 
-
-def playerStandings():
+def playerStandings(tournament_id):
     """Returns a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a player
     tied for first place if there is currently a tie.
+
+    Args:
+      tournament_id: the id for the tournament.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -47,7 +82,7 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-
+    pass
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -56,7 +91,7 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
- 
+    pass
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -73,5 +108,4 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-
-
+    pass
