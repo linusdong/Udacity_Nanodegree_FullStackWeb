@@ -36,7 +36,7 @@ def deletePlayers():
 def countPlayers():
     """Returns the number of players currently registered."""
     query= '''
-    select count(*) as num from players order by num;
+    select * from num_players;
     '''
     db = connect()
     c = db.cursor()
@@ -58,22 +58,19 @@ def registerPlayer(name):
       name: the player's full name (need not be unique).
     """
     query = '''
-    insert into players (name) values(%s);
+    insert into players (p_name) values(%s);
     '''
     db = connect()
     c = db.cursor()
     c.execute(query, (name,))
     db.commit()
-    db.close() 
+    db.close()
 
-def playerStandings(tournament_id):
+def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a player
     tied for first place if there is currently a tie.
-
-    Args:
-      tournament_id: the id for the tournament.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -82,7 +79,16 @@ def playerStandings(tournament_id):
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    pass
+    query = '''
+    select * from player_standings;
+    '''
+    db = connect()
+    c = db.cursor()
+    c.execute(query)
+    standings = c.fetchall()
+    db.commit()
+    db.close()
+    return standings
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -91,7 +97,14 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    pass
+    query = '''
+    insert into matches (w_player_id, l_player_id) values(%s,%s);
+    '''
+    db = connect()
+    c = db.cursor()
+    c.execute(query, (winner,loser))
+    db.commit()
+    db.close()
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -108,4 +121,13 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-    pass
+    query = '''
+    select * from swiss_pairings;
+    '''
+    db = connect()
+    c = db.cursor()
+    c.execute(query)
+    swissPairings = c.fetchall()
+    db.commit()
+    db.close()
+    return swissPairings

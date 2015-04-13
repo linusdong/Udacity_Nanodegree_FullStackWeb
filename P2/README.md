@@ -1,6 +1,7 @@
 # Tournament Results: Getting Started
 
 ## Change log
+* April 12th 2015, pass all basic test1 to test8.
 * April 11th 2015, pass test 1 to test 5.
 * April 10th 2015, initial commit.
 
