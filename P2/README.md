@@ -29,6 +29,7 @@ psql -f tournament.sql
 python tournament_test.py
 ```
 * check result
+* extra credit database and test script is with "extra_" prefix.
 
 ## Extra credit
 1. Support more than one tournament in the database.
