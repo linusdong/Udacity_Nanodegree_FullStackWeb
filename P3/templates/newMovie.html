@@ -1,0 +1,25 @@
+<html>
+
+<body>
+
+<h1>New Movie</h1>
+
+<form action="{{ url_for('newMovie', director_id = director.id)}}" method = 'post'>
+
+
+	<p>Name:</p>
+		<input type ='text' size='30' name='name'>
+	<p>Image:</p>
+		<input type ='text' size='100' name='image' placeholder='Please enter URL for the image.'>
+	<p>Trailer:</p>
+		<input type ='text' size='100' name='trailer' placeholder='Please enter URL for the trailer.'>
+	<p>Description:</p>
+		<textarea rows='5' cols='55' name='description' placeholder='Please enter some short biography for the director.'></textarea>
+<br>
+<input type='submit' value='Create'>
+
+
+</form>
+</body>
+
+</html>

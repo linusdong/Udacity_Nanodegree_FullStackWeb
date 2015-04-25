@@ -1,0 +1,37 @@
+<html>
+
+<body>
+
+<h1>The list of Linus' favourite directors</h1>
+
+<!--MESSAGE FLASHING EXAMPLE -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+
+<ul>
+{% for message in messages %}
+  <li><strong>{{message}}</strong></li>
+  {% endfor %}
+</ul>
+
+{% endif %}
+{% endwith %}
+
+<a href='{{url_for('newDirector')}}'> Add director to the list</a>
+
+{% if directors %}
+{% for d in directors %}
+
+<div>
+<a href='{{url_for('listDirector', director_id = d.id)}}'>
+<img alt="{{d.name}}" src="{{d.image}}" width="140" height="209">
+</a>
+<a href='{{url_for('listDirector', director_id = d.id)}}'>{{d.name}}</a>
+
+</div>
+
+{% endfor %}
+{% endif %}
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+<html>
+
+<body>
+
+<h1>{{director.name}}'s biography</h1>
+
+<p>Name:</p><p>{{director.name}}</p>
+<p>Description:</p><p>{{director.bio}}</p>
+<p>Director:</p>
+
+<ul>
+{% for m in movies %}
+  <li>
+  	<a href='{{url_for('listMovie', director_id = director.id, movie_id = m.id)}}'>
+  		{{m.name}}</a>
+  </li>
+{% endfor %}
+</ul>
+
+</body>
+
+</html>

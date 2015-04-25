@@ -1,0 +1,22 @@
+<html>
+
+<body>
+
+<h1>New Director</h1>
+
+<form action="{{ url_for('newDirector')}}" method = 'post'>
+
+
+	<p>Name:</p>
+		<input type ='text' size='30' name='name'>
+	<p>Image:</p>
+		<input type ='text' size='100' name='image'>
+	<p>Description:</p>
+		<textarea rows='5' cols='55' name='description' placeholder='Please enter some short biography for the director.'></textarea>
+<input type='submit' value='Create'>
+
+
+</form>
+</body>
+
+</html>
