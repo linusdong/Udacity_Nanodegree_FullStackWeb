@@ -4,17 +4,33 @@
 
 <h1>{{director.name}}'s biography</h1>
 
+<!--MESSAGE FLASHING EXAMPLE -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+
+<ul>
+{% for message in messages %}
+  <li><strong>{{message}}</strong></li>
+  {% endfor %}
+</ul>
+
+{% endif %}
+{% endwith %}
+
 <p>Name:</p><p>{{director.name}}</p>
 <p>Description:</p><p>{{director.bio}}</p>
+<p><a href="{{url_for('newMovie', director_id = director.id)}}"> Add Movie to the list</a></p>
+{% if movies %}
 <p>Director:</p>
 
 <ul>
 {% for m in movies %}
   <li>
-  	<a href='{{url_for('listMovie', director_id = director.id, movie_id = m.id)}}'>
-  		{{m.name}}</a>
+  	<p><a href="{{url_for('listMovie', director_id = director.id, movie_id = m.id)}}">{{m.name}}</a></p>
+  	<p> <a href="{{url_for('deleteMovie', director_id = director.id, movie_id = m.id)}}">Delete Movie</a></p>
   </li>
 {% endfor %}
+{% endif %}
 </ul>
 
 </body>

@@ -2,7 +2,7 @@
 
 <body>
 
-<h1>Delete {{director.name}}'s biography</h1>
+<h1>Edit {{director.name}}'s biography</h1>
 
 <form action="{{ url_for('editDirector', director_id = director.id)}}" method = 'post'>
 
@@ -12,7 +12,7 @@
 	<p>Image:</p>
 		<input type ='text' size='100' name='image' placeholder='{{director.image}}'>
 	<p>Description:</p>
-		<textarea rows='5' cols='55' name='description' placeholder='{{director.bio}}'></textarea>
+		<textarea rows='5' cols='55' name='bio' placeholder='{{director.bio}}'></textarea>
 <input type='submit' value='Edit'>
 
 

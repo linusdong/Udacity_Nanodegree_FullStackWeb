@@ -1,6 +1,7 @@
 # Item Catalog: Getting Started
 
 ## Change log
+* April 26th 2015, database setted. CURD methods implemented.
 * April 24th 2015, mock up templates in places.
 * April 21st 2015, initial commit. Readme file added.
 

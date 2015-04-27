@@ -17,16 +17,18 @@
 {% endif %}
 {% endwith %}
 
-<a href='{{url_for('newDirector')}}'> Add director to the list</a>
+<a href="{{url_for('newDirector')}}"> Add director to the list</a>
 
 {% if directors %}
 {% for d in directors %}
 
 <div>
-<a href='{{url_for('listDirector', director_id = d.id)}}'>
+<p><a href="{{url_for('listDirector', director_id = d.id)}}">
 <img alt="{{d.name}}" src="{{d.image}}" width="140" height="209">
-</a>
-<a href='{{url_for('listDirector', director_id = d.id)}}'>{{d.name}}</a>
+</a></p>
+<p><a href="{{url_for('listDirector', director_id = d.id)}}">{{d.name}}</a></p>
+<p><a href="{{url_for('editDirector', director_id = d.id)}}">Edit Director</a></p>
+<p> <a href="{{url_for('deleteDirector', director_id = d.id)}}">Delete Director</a></p>
 
 </div>
 
