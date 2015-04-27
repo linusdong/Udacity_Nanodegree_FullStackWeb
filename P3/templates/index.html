@@ -27,8 +27,8 @@
 <img alt="{{d.name}}" src="{{d.image}}" width="140" height="209">
 </a></p>
 <p><a href="{{url_for('listDirector', director_id = d.id)}}">{{d.name}}</a></p>
-<p><a href="{{url_for('editDirector', director_id = d.id)}}">Edit Director</a></p>
-<p> <a href="{{url_for('deleteDirector', director_id = d.id)}}">Delete Director</a></p>
+<a href="{{url_for('editDirector', director_id = d.id)}}">[ Edit ]</a>
+<a href="{{url_for('deleteDirector', director_id = d.id)}}">[ Delete ]</a>
 
 </div>
 

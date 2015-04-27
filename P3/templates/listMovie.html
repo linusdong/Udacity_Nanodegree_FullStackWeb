@@ -5,6 +5,7 @@
 <h1>{{movie.name}}</h1>
 
 <p><img alt="{{movie.name}}" src="{{movie.image}}" width="140" height="209"></p>
+<p><a href="{{url_for('editMovie', movie_id = movie.id)}}">Edit Movie</a></p>
 <p>Description:</p>
 <p>{{movie.description}}</p>
 <p>Trailer:</p><p>{{movie.trailer}}</p>

@@ -2,7 +2,7 @@
 
 <body>
 
-<h1>New Movie</h1>
+<h1>Edit {{movie.name}}</h1>
 
 <form action="{{ url_for('editMovie', director_id = director.id, movie_id = movie.id)}}" method = 'post'>
 

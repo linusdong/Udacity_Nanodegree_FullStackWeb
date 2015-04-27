@@ -27,7 +27,8 @@
 {% for m in movies %}
   <li>
   	<p><a href="{{url_for('listMovie', director_id = director.id, movie_id = m.id)}}">{{m.name}}</a></p>
-  	<p> <a href="{{url_for('deleteMovie', director_id = director.id, movie_id = m.id)}}">Delete Movie</a></p>
+  	<a href="{{url_for('editMovie', director_id = director.id, movie_id = m.id)}}">[ Edit ]</a>
+  	<a href="{{url_for('deleteMovie', director_id = director.id, movie_id = m.id)}}">[ Delete ]</a>
   </li>
 {% endfor %}
 {% endif %}
