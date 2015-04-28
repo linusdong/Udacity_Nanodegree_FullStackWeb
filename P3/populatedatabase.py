@@ -9,7 +9,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-#Movie for Martin Scorsese
+#Movies for Martin Scorsese
 director1 = Director(	name = "Martin Scorsese",
 						bio = "Martin Charles Scorsese is an American director, producer, screenwriter, actor, and film historian. Part of the New Hollywood wave of filmmaking, he is widely regarded as one of the most significant and influential filmmakers in cinema history.",
 						image = "http://ia.media-imdb.com/images/M/MV5BMTcyNDA4Nzk3N15BMl5BanBnXkFtZTcwNDYzMjMxMw@@._V1._SX140_CR0,0,140,209_.jpg")
@@ -39,4 +39,20 @@ movie3 = Movie(	name = "Shutter Island",
 				description = "The implausible escape of a brilliant murderess brings U.S. Marshal Teddy Daniels (Leonardo DiCaprio) and his new partner (Mark Ruffalo) to Ashecliffe Hospital, a fortress-like insane asylum located on a remote, windswept island. The woman appears to have vanished from a locked room, and there are hints of terrible deeds committed within the hospital walls. As the investigation deepens, Teddy realizes he will have to confront his own dark fears if he hopes to make it off the island alive.",
 				director = director1)
 session.add(movie3)
+session.commit()
+
+#Movies for George Lucas
+director1 = Director(	name = "George Lucas",
+						bio = "George Walton Lucas, Jr. is an American film director, screenwriter, producer, and entrepreneur. He founded Lucasfilm and led the company as chairman and chief executive before selling it to The Walt Disney Company on October 30, 2012.",
+						image = "http://ia.media-imdb.com/images/M/MV5BMTA0Mjc0NzExNzBeQTJeQWpwZ15BbWU3MDEzMzQ3MDI@._V1._SY209_CR1,0,140,209_.jpg")
+
+session.add(director1)
+session.commit()
+
+movie1 = Movie(	name = "Star Wars: Episode IV - A New Hope",
+				image = "http://ia.media-imdb.com/images/M/MV5BMTU4NTczODkwM15BMl5BanBnXkFtZTcwMzEyMTIyMw@@._V1_SX214_AL_.jpg",
+				trailer = "https://youtu.be/vZ734NWnAHA",
+				description = "Luke Skywalker joins forces with a Jedi Knight, a cocky pilot, a wookiee and two droids to save the universe from the Empire's world-destroying battle-station, while also attempting to rescue Princess Leia from the evil Darth Vader.",
+				director = director1)
+session.add(movie1)
 session.commit()

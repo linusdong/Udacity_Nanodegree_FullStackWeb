@@ -114,8 +114,9 @@ def deleteDirector(director_id):
 	directorToDelete = session.query(Director).filter_by(id = director_id).one()
 	moviesToDelete = session.query(Movie).filter_by(director_id = director_id).all()
 	if request.method == 'POST':
+		for movie in moviesToDelete:
+			session.delete(movie)
 		session.delete(directorToDelete)
-		session.delete(moviesToDelete)
 		session.commit()
 		flash("Director Delete Successfully!")
 		return redirect(url_for('listAllDirectors'))
