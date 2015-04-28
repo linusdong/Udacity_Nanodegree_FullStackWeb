@@ -19,16 +19,16 @@
 
 <p>Name:</p><p>{{director.name}}</p>
 <p>Description:</p><p>{{director.bio}}</p>
-<p><a href="{{url_for('newMovie', director_id = director_id)}}"> Add Movie to the list</a></p>
+<p><a href="{{url_for('newMovie', director_id = director.id)}}"> Add Movie to the list</a></p>
 {% if movies %}
 <p>Director:</p>
 
 <ul>
 {% for m in movies %}
   <li>
-  	<p><a href="{{url_for('listMovie', director_id = director_id, movie_id = m.id)}}">{{m.name}}</a></p>
-  	<a href="{{url_for('editMovie', director_id = director_id, movie_id = m.id)}}">[ Edit ]</a>
-  	<a href="{{url_for('deleteMovie', director_id = director_id, movie_id = m.id)}}">[ Delete ]</a>
+  	<p><a href="{{url_for('listMovie', director_id = director.id, movie_id = m.id)}}">{{m.name}}</a></p>
+  	<a href="{{url_for('editMovie', director_id = director.id, movie_id = m.id)}}">[ Edit ]</a>
+  	<a href="{{url_for('deleteMovie', director_id = director_.d, movie_id = m.id)}}">[ Delete ]</a>
   </li>
 {% endfor %}
 {% endif %}

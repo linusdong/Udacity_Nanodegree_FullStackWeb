@@ -120,7 +120,7 @@ def deleteDirector(director_id):
 		flash("Director Delete Successfully!")
 		return redirect(url_for('listAllDirectors'))
 	else:
-		return render_template('deleteDirector.html', director_id = director_id)
+		return render_template('deleteDirector.html', director = directorToDelete)
 
 # list movies
 @app.route('/movies/')
@@ -133,6 +133,7 @@ def listAllMovies():
 # Create new movie
 @app.route('/director/<int:director_id>/movie/new', methods=['GET','POST'])
 def newMovie(director_id):
+	director = session.query(Director).filter_by(id = director_id).one()
 	if request.method == 'POST':
 		newMovie = Movie(	name = request.form['name'],
 							image = request.form['image'],
@@ -142,7 +143,7 @@ def newMovie(director_id):
 		session.add(newMovie)
 		session.commit()
 		flash("Movie Created Successfully!")
-		return redirect(url_for('listDirector', director_id = director_id))
+		return redirect(url_for('listDirector', director = director))
 	else:
 		return render_template('newMovie.html', director_id = director_id)
 
@@ -164,7 +165,7 @@ def editMovie(director_id, movie_id):
 		session.add(editedMovie)
 		session.commit()
 		flash("Movie Edited Successfully!")
-		return redirect(url_for('listDirector', director_id = director_id))
+		return redirect(url_for('listDirector', director = director))
 	else:
 		return render_template('editMovie.html', movie = editedMovie)
 
@@ -179,12 +180,13 @@ def listMovie(director_id, movie_id):
 @app.route('/director/<string:director_id>/movie/<string:movie_id>/delete',
 			methods=['GET','POST'])
 def deleteMovie(director_id, movie_id):
+	director = session.query(Director).filter_by(id = director_id).one()
 	movieToDelete = session.query(Movie).filter_by(id = movie_id).one()
 	if request.method == 'POST':
 		session.delete(directorToDelete)
 		session.commit()
 		flash("Movie Deleted Successfully!")
-		return redirect(url_for('listDirector', director_id = director_id))
+		return redirect(url_for('listDirector', director = director))
 	else:
 		return render_template('deleteMovie.html', movie = movieToDelete)
 
