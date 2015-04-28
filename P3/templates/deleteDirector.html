@@ -4,14 +4,14 @@
 
 <h1>Delete {{director.name}}'s biography</h1>
 
-<form action="{{ url_for('deleteDirector', director_id = director.id)}}" method = 'post'>
+<form action="{{url_for('deleteDirector', director_id = director.id)}}" method = 'post'>
 
 
 <input type='submit' value='Confirm'>
 
 
 </form>
-<a href = "{{ url_for('listAllDirectors')}}"> Cancel </a>
+<a href = "{{url_for('listAllDirectors')}}"> Cancel </a>
 </body>
 
 </html>

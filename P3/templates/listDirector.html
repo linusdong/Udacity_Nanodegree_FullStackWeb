@@ -16,7 +16,7 @@
 
 {% endif %}
 {% endwith %}
-
+<p><a href="{{url_for('listAllDirectors')}}">Back to Home page</a></p>
 <p>Name:</p><p>{{director.name}}</p>
 <p>Description:</p><p>{{director.bio}}</p>
 <p><a href="{{url_for('newMovie', director_id = director.id)}}"> Add Movie to the list</a></p>

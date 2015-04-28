@@ -61,7 +61,7 @@ def directorsJSON():
 @app.route('/directors')
 def listAllDirectors():
 	directors = session.query(Director).all()
-	if directors is None:
+	if not directors:
 		flash("No director on the list. Let's add one")
 	return render_template('index.html', directors = directors)
 
@@ -103,7 +103,7 @@ def editDirector(director_id):
 def listDirector(director_id):
 	director = session.query(Director).filter_by(id = director_id).one()
 	movies = session.query(Movie).filter_by(director_id = director_id).all()
-	if movies is None:
+	if not movies:
 		flash("No movie on the list. Let's add one")
 	return render_template('listDirector.html', director = director,
 												movies = movies)
@@ -127,7 +127,7 @@ def deleteDirector(director_id):
 @app.route('/movies/')
 @app.route('/movies')
 def listAllMovies():
-	if movies is None:
+	if not movies:
 		flash("No movie on the list. Let's add one")
 	return render_template('listAllMovies.html', movies = movies)
 
@@ -184,7 +184,7 @@ def deleteMovie(director_id, movie_id):
 	director = session.query(Director).filter_by(id = director_id).one()
 	movieToDelete = session.query(Movie).filter_by(id = movie_id).one()
 	if request.method == 'POST':
-		session.delete(directorToDelete)
+		session.delete(movieToDelete)
 		session.commit()
 		flash("Movie Deleted Successfully!")
 		return redirect(url_for('listDirector', director_id = director_id))
