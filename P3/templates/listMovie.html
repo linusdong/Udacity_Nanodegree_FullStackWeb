@@ -1,15 +1,74 @@
-<html>
+{% extends "layout.html" %}
+{% block title %}{{movie.name}}{% endblock %}
+{% block head %}
+<script type="text/javascript" charset="utf-8">
+    // Pause the video when the modal is closed
+    $(document).on('click', '.hanging-close, .modal-backdrop, .modal', function (event) {
+        // Remove the src so the player itself gets removed, as this is the only
+        // reliable way to ensure the video stops playing in IE
+        $("#trailer-video-container").empty();
+    });
+    // Start playing the video whenever the trailer modal is opened
+    $(document).on('click', '.trailer', function (event) {
+        var trailerYouTubeId = $(this).attr('data-trailer-youtube-id')
+        var sourceUrl = 'http://www.youtube.com/embed/' + trailerYouTubeId + '?autoplay=1&html5=1';
+        $("#trailer-video-container").empty().append($("<iframe></iframe>", {
+          'id': 'trailer-video',
+          'type': 'text-html',
+          'src': sourceUrl,
+          'frameborder': 0
+        }));
+    });
+</script>
+{% endblock %}
+{% block navbar %}
+<div class="collapse navbar-collapse">
+	<ul class="nav navbar-nav">
+		<li>
+			<a href="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}"> Edit Movie</a>
+		</li>
+	</ul>
+</div>
+{% endblock %}
+{% block content %}
+<!--MESSAGE FLASHING EXAMPLE index start-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+	<div class="col-md-6 col-lg-4 text-center">
+		<ul>
+			{% for message in messages %}
+			<li><b>{{message}}</b></li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endif %}
+{% endwith %}
 
-<body>
+<!-- Trailer Video Modal -->
+<div class="modal" id="trailer">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <a href="#" class="hanging-close" data-dismiss="modal" aria-hidden="true">
+        <img src="https://lh5.ggpht.com/v4-628SilF0HtHuHdu5EzxD7WRqOrrTIDi_MhEG6_qkNtUK5Wg7KPkofp_VJoF7RS2LhxwEFCO1ICHZlc-o_=s0#w=24&h=24"/>
+      </a>
+      <div class="scale-media" id="trailer-video-container">
+      </div>
+    </div>
+  </div>
+</div>
 
-<h1>{{movie.name}}</h1>
-<p><a href="{{url_for('listDirector', director_id = movie.director_id)}}">Back to director page</a></p>
-<p><img alt="{{movie.name}}" src="{{movie.image}}" width="140" height="209"></p>
-<p><a href="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}">Edit Movie</a></p>
-<p>Description:</p>
-<p>{{movie.description}}</p>
-<p>Trailer:</p><p>{{movie.trailer}}</p>
-
-</body>
-
-</html>
+<div class="row">
+	<div class="col-md-6 col-lg-4 text-center">
+		<img alt="{{movie.name}}" src="{{movie.image}}" width="140" height="209">
+	</div>
+	<div class="col-md-9 col-lg-7 text-left">
+		<p><b>Name:</b></p><p>{{movie.name}}</p>
+		<p><b>Director:</b></p><p><a href="{{url_for('listDirector', director_id = director.id)}}">{{director.name}}</a></p>
+		<p><b>Description:</b></p><p>{{movie.description}}</p>
+		<!--trailer button here-->
+		<a href="#" data-trailer-youtube-id="{{movie.trailer}}" class="btn btn-primary trailer" role="button">Watch Trailer</a>
+	</div>
+</div>
+{% endblock %}

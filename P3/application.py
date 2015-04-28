@@ -1,6 +1,7 @@
 '''Movie Director App
 	Created by Linus Dong April 22nd 2015
 '''
+import re
 from flask import Flask, render_template, request, redirect,jsonify, url_for, flash
 app = Flask(__name__)
 
@@ -39,6 +40,13 @@ movies=	[	{	'name': 'American Sniper', 'id': '3', 'image': 'dummy',
 movie = {	'name': 'J. Edgar ', 'id': '1', 'image': 'dummy',
 			'description': 'dummy_bio1', 'trailer': 'dummy_trailer1', 'director_id': '1'}
 
+# Extract the youtube ID from the url
+def getYoutubeId(youtube_url):
+	youtube_id_match = re.search(r'(?<=v=)[^&#]+', youtube_url)
+	youtube_id_match = youtube_id_match or re.search(r'(?<=be/)[^&#]+', youtube_url)
+	youtube_id_match = youtube_id_match or re.search(r'(?<=embed/)[^&#]+', youtube_url)
+	trailer_youtube_id = youtube_id_match.group(0) if youtube_id_match else None
+	return trailer_youtube_id
 
 @app.route('/director/<int:director_id>/movie/<int:movie_id>/JSON')
 def movieJSON(director_id, movie_id):
@@ -136,9 +144,11 @@ def listAllMovies():
 def newMovie(director_id):
 	director = session.query(Director).filter_by(id = director_id).one()
 	if request.method == 'POST':
+		# strip out youtube id
+		trailer_id = getYoutubeId(request.form['trailer'])
 		newMovie = Movie(	name = request.form['name'],
 							image = request.form['image'],
-							trailer = request.form['trailer'],
+							trailer = trailer_id,
 							description = request.form['description'],
 							director_id = director_id)
 		session.add(newMovie)
@@ -162,7 +172,8 @@ def editMovie(director_id, movie_id):
 		if request.form['description']:
 			editedMovie.description = request.form['description']
 		if request.form['trailer']:
-			editedMovie.trailer = request.form['trailer']
+			trailer_id = getYoutubeId(request.form['trailer'])
+			editedMovie.trailer = trailer_id
 		session.add(editedMovie)
 		session.commit()
 		flash("Movie Edited Successfully!")
@@ -174,8 +185,9 @@ def editMovie(director_id, movie_id):
 @app.route('/director/<int:director_id>/movie/<int:movie_id>/')
 @app.route('/director/<int:director_id>/movie/<int:movie_id>')
 def listMovie(director_id, movie_id):
+	director = session.query(Director).filter_by(id = director_id).one()
 	movie = session.query(Movie).filter_by(id = movie_id).one()
-	return render_template('listMovie.html', movie = movie)
+	return render_template('listMovie.html', movie = movie, director = director)
 
 # Delete Movie information
 @app.route('/director/<string:director_id>/movie/<string:movie_id>/delete',
