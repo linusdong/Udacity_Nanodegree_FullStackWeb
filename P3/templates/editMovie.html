@@ -4,7 +4,7 @@
 
 <h1>Edit {{movie.name}}</h1>
 
-<form action="{{ url_for('editMovie', director_id = director.id, movie_id = movie.id)}}" method = 'post'>
+<form action="{{ url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}" method = 'post'>
 
 
 	<p>Name:</p>
@@ -15,8 +15,7 @@
 		<input type ='text' size='100' name='trailer' placeholder='{{movie.trailer}}'>
 	<p>Description:</p>
 		<textarea rows='5' cols='55' name='description' placeholder='{{movie.description}}'></textarea>
-<br>
-<input type='submit' value='Create'>
+	<p><input type='submit' value='Edit'></p>
 
 
 </form>

@@ -40,6 +40,21 @@ movie = {	'name': 'J. Edgar ', 'id': '1', 'image': 'dummy',
 			'description': 'dummy_bio1', 'trailer': 'dummy_trailer1', 'director_id': '1'}
 
 
+@app.route('/director/<int:director_id>/movie/<int:movie_id>/JSON')
+def movieJSON(director_id, movie_id):
+	movie = session.query(Movie).filter_by(id = movie_id).one()
+	return jsonify(movie= movie.serialize)
+
+@app.route('/director/<int:director_id>/movies/JSON')
+def directorMoviesJSON(director_id):
+	movies = session.query(Movie).filter_by(director_id = director_id).all()
+	return jsonify(movies=[m.serialize for m in movies])
+
+@app.route('/directors/JSON')
+def directorsJSON():
+	directors = session.query(Director).all()
+	return jsonify(directors= [d.serialize for d in directors])
+
 # list movie directors
 @app.route('/')
 @app.route('/directors/')
@@ -59,6 +74,7 @@ def newDirector():
 								bio = request.form['bio'])
 		session.add(newDirector)
 		session.commit()
+		flash("New Director Created!")
 		return redirect(url_for('listAllDirectors'))
 	else:
 		return render_template('newDirector.html')
@@ -76,6 +92,7 @@ def editDirector(director_id):
 			editedDirector.bio = request.form['bio']
 		session.add(editedDirector)
 		session.commit()
+		flash("Director Edited Successfully!")
 		return redirect(url_for('listDirector', director_id = director_id))
 	else:
 		return render_template('editDirector.html', director = editedDirector)
@@ -88,18 +105,22 @@ def listDirector(director_id):
 	movies = session.query(Movie).filter_by(director_id = director_id).all()
 	if movies is None:
 		flash("No movie on the list. Let's add one")
-	return render_template('listDirector.html', director = director, movies = movies)
+	return render_template('listDirector.html', director_id = director_id,
+												movies = movies)
 
 # Delete Movie director information
 @app.route('/director/<int:director_id>/delete', methods=['GET','POST'])
 def deleteDirector(director_id):
 	directorToDelete = session.query(Director).filter_by(id = director_id).one()
+	moviesToDelete = session.query(Movie).filter_by(director_id = director_id).all()
 	if request.method == 'POST':
 		session.delete(directorToDelete)
+		session.delete(moviesToDelete)
 		session.commit()
+		flash("Director Delete Successfully!")
 		return redirect(url_for('listAllDirectors'))
 	else:
-		return render_template('deleteDirector.html', director = directorToDelete)
+		return render_template('deleteDirector.html', director_id = director_id)
 
 # list movies
 @app.route('/movies/')
@@ -120,9 +141,10 @@ def newMovie(director_id):
 							director_id = director_id)
 		session.add(newMovie)
 		session.commit()
+		flash("Movie Created Successfully!")
 		return redirect(url_for('listDirector', director_id = director_id))
 	else:
-		return render_template('newMovie.html', director = director)
+		return render_template('newMovie.html', director_id = director_id)
 
 # Update movie information
 @app.route('/director/<int:director_id>/movie/<int:movie_id>/edit',
@@ -140,10 +162,11 @@ def editMovie(director_id, movie_id):
 		if request.form['trailer']:
 			editedMovie.trailer = request.form['trailer']
 		session.add(editedMovie)
-		session.commit() 
+		session.commit()
+		flash("Movie Edited Successfully!")
 		return redirect(url_for('listDirector', director_id = director_id))
 	else:
-		return render_template('editMovie.html', movie = editedMovie, director = director)
+		return render_template('editMovie.html', movie = editedMovie)
 
 # Read movie information
 @app.route('/director/<int:director_id>/movie/<int:movie_id>/')
@@ -160,6 +183,7 @@ def deleteMovie(director_id, movie_id):
 	if request.method == 'POST':
 		session.delete(directorToDelete)
 		session.commit()
+		flash("Movie Deleted Successfully!")
 		return redirect(url_for('listDirector', director_id = director_id))
 	else:
 		return render_template('deleteMovie.html', movie = movieToDelete)
