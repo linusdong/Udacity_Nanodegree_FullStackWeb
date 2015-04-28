@@ -93,7 +93,7 @@ def editDirector(director_id):
 		session.add(editedDirector)
 		session.commit()
 		flash("Director Edited Successfully!")
-		return redirect(url_for('listDirector', director_id = director_id))
+		return redirect(url_for('listDirector', director = editedDirector))
 	else:
 		return render_template('editDirector.html', director = editedDirector)
 
@@ -105,7 +105,7 @@ def listDirector(director_id):
 	movies = session.query(Movie).filter_by(director_id = director_id).all()
 	if movies is None:
 		flash("No movie on the list. Let's add one")
-	return render_template('listDirector.html', director_id = director_id,
+	return render_template('listDirector.html', director = director,
 												movies = movies)
 
 # Delete Movie director information
