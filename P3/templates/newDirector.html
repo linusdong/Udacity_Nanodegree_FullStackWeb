@@ -1,22 +1,28 @@
-<html>
-
-<body>
-
-<h1>New Director</h1>
-
-<form action="{{url_for('newDirector')}}" method = 'post'>
-
-
-	<p>Name:</p>
-		<input type ='text' size='30' name='name'>
-	<p>Image:</p>
-		<input type ='text' size='100' name='image' placeholder='Please enter URL for the image.'>
-	<p>Description:</p>
-		<textarea rows='5' cols='55' name='bio' placeholder='Please enter some short biography for the director.'></textarea>
-	<p><input type='submit' value='Create'></p>
-
-
+{% extends "layout.html" %}
+{% block title %}New Director{% endblock %}
+{% block content %}
+<form class="form-horizontal" action="{{url_for('newDirector')}}" method = "post">
+	<div class="form-group">
+		<label for="inputName" class="col-sm-2 control-label">Name</label>
+		<div class="col-xs-4"><input type ="text" class="form-control" name="name"></div>
+	</div>
+	<div class="form-group">
+		<label for="inputImage" class="col-sm-2 control-label">Image</label>
+		<div class="col-xs-9">
+			<input type ="text" class="form-control" name="image" placeholder="Please enter URL for the image.">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputDescription" class="col-sm-2 control-label">Biography</label>
+		<div class="col-xs-9">
+			<textarea class="form-control" rows="5" name="bio"
+			placeholder="Please enter some short biography for the director."></textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-default">Create</button>
+		</div>
+	</div>
 </form>
-</body>
-
-</html>
+{% endblock %}

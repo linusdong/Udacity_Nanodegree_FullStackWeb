@@ -1,22 +1,28 @@
-<html>
-
-<body>
-
-<h1>Edit {{director.name}}'s biography</h1>
-
-<form action="{{url_for('editDirector', director_id = director.id)}}" method = 'post'>
-
-
-	<p>Name:</p>
-		<input type ='text' size='30' name='name' placeholder='{{director.name}}'>
-	<p>Image:</p>
-		<input type ='text' size='100' name='image' placeholder='{{director.image}}'>
-	<p>Description:</p>
-		<textarea rows='5' cols='55' name='bio' placeholder='{{director.bio}}'></textarea>
-	<p><input type='submit' value='Edit'></p>
-
-
+{% extends "layout.html" %}
+{% block title %}Edit {{director.name}}{% endblock %}
+{% block content %}
+<form class="form-horizontal" action="{{url_for('editDirector', director_id = director.id)}}" method = "post">
+	<div class="form-group">
+		<label for="inputName" class="col-sm-2 control-label">Name</label>
+		<div class="col-xs-4"><input type ="text" class="form-control" name="name" placeholder="{{director.name}}"></div>
+	</div>
+	<div class="form-group">
+		<label for="inputImage" class="col-sm-2 control-label">Image</label>
+		<div class="col-xs-9">
+			<input type ="text" class="form-control" name="image" placeholder="{{director.image}}">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputDescription" class="col-sm-2 control-label">Biography</label>
+		<div class="col-xs-9">
+			<textarea class="form-control" rows="5" name="bio"
+			placeholder="{{director.bio}}"></textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-default">Edit</button>
+		</div>
+	</div>
 </form>
-</body>
-
-</html>
+{% endblock %}
