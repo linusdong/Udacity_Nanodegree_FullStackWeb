@@ -1,39 +1,43 @@
-<html>
-
-<body>
-
-<h1>The list of Linus' favourite directors</h1>
-
-<!--MESSAGE FLASHING EXAMPLE -->
+{% extends "layout.html" %}
+{% block title %}Linus' favourite directors{% endblock %}
+{% block navbar %}
+<div class="collapse navbar-collapse">
+	<ul class="nav navbar-nav">
+		<li>
+			<a href="{{url_for('newDirector')}}"> Add director</a>
+		</li>
+	</ul>
+</div>
+{% endblock %}
+{% block content %}
+<!--MESSAGE FLASHING EXAMPLE index start-->
 {% with messages = get_flashed_messages() %}
 {% if messages %}
-
-<ul>
-{% for message in messages %}
-  <li><strong>{{message}}</strong></li>
-  {% endfor %}
-</ul>
-
+<div class="row">
+	<div class="col-md-6 col-lg-4 text-center">
+		<ul>
+			{% for message in messages %}
+			<li><strong>{{message}}</strong></li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
 {% endif %}
 {% endwith %}
-
-<a href="{{url_for('newDirector')}}"> Add director to the list</a>
-
+<!--MESSAGE FLASHING EXAMPLE index end-->
+<div class="row">
 {% if directors %}
 {% for d in directors %}
-
-<div>
-<p><a href="{{url_for('listDirector', director_id = d.id)}}">
-<img alt="{{d.name}}" src="{{d.image}}" width="140" height="209">
-</a></p>
-<p><a href="{{url_for('listDirector', director_id = d.id)}}">{{d.name}}</a></p>
-<a href="{{url_for('editDirector', director_id = d.id)}}">[ Edit ]</a>
-<a href="{{url_for('deleteDirector', director_id = d.id)}}">[ Delete ]</a>
-
-</div>
-
+	<div class="col-md-6 col-lg-4 text-center">
+		<a href="{{url_for('listDirector', director_id = d.id)}}">
+			<img alt="{{d.name}}" src="{{d.image}}" width="140" height="209">
+		</a>
+		<h2>{{d.name}}</h2>
+		<a href="{{url_for('editDirector', director_id = d.id)}}">[ Edit ]</a>
+		<a href="{{url_for('deleteDirector', director_id = d.id)}}">[ Delete ]</a>		
+	</div>
 {% endfor %}
 {% endif %}
-</body>
+</div>
 
-</html>
+{% endblock %}
