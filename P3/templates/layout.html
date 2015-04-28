@@ -2,13 +2,13 @@
 <html>
   <head>
     {% block head %}
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
     <title>{% block title %}{% endblock %} - Linus Webpage</title>
     <script type="text/javascript" charset="utf-8">
@@ -35,7 +35,7 @@
     </div>
     <div id="footer">
       {% block footer %}
-      <p class="center">&copy; Copyright 2015 by <a href="http://www.linkedin.com/in/jianxidong">Linus Dong</a>.</p>
+      <p class="center">Created in 2015 by <a href="http://www.linkedin.com/in/jianxidong">Linus Dong</a>.</p>
       {% endblock %}
     </div>
   </body>

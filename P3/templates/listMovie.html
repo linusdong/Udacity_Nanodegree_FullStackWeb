@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}{{movie.name}}{% endblock %}
 {% block head %}
+{{ super() }}
 <script type="text/javascript" charset="utf-8">
     // Pause the video when the modal is closed
     $(document).on('click', '.hanging-close, .modal-backdrop, .modal', function (event) {
@@ -9,8 +10,10 @@
         $("#trailer-video-container").empty();
     });
     // Start playing the video whenever the trailer modal is opened
-    $(document).on('click', '.trailer', function (event) {
+    $(document).on('click', '.btn-trailer', function (event) {
+    	console.log("button clicked!!")
         var trailerYouTubeId = $(this).attr('data-trailer-youtube-id')
+        console.log(trailerYouTubeId)
         var sourceUrl = 'http://www.youtube.com/embed/' + trailerYouTubeId + '?autoplay=1&html5=1';
         $("#trailer-video-container").empty().append($("<iframe></iframe>", {
           'id': 'trailer-video',
@@ -68,7 +71,7 @@
 		<p><b>Director:</b></p><p><a href="{{url_for('listDirector', director_id = director.id)}}">{{director.name}}</a></p>
 		<p><b>Description:</b></p><p>{{movie.description}}</p>
 		<!--trailer button here-->
-		<a href="#" data-trailer-youtube-id="{{movie.trailer}}" class="btn btn-primary trailer" role="button">Watch Trailer</a>
+		<a href="#" class="btn btn-primary btn-trailer" data-trailer-youtube-id="{{movie.trailer}}" data-toggle="modal" data-target="#trailer" role="button">Watch Trailer</a>
 	</div>
 </div>
 {% endblock %}
