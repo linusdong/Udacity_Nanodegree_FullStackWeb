@@ -2,14 +2,16 @@
 {% block title %}Delete {{director.name}}{% endblock %}
 {% block content %}
 <h1>Delete {{director.name}}</h1>
-<div class="row">
 <form class="form-horizontal" action="{{url_for('deleteDirector', director_id = director.id)}}" method = "post">
-	<div class="col-sm-offset-2 col-sm-10">
-		<button type="submit" class="btn btn-primary">Confirm</button>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-primary">Confirm</button>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<a href="{{url_for('listAllDirectors', director_id = movie.director_id)}}" class="btn btn-default" role="button">Cancel</a>
+		</div>
 	</div>
 </form>
-<div class="col-sm-offset-2 col-sm-10">
-	<a href="{{url_for('listAllDirectors')}}" class="btn btn-default" role="button">Cancel</a>
-</div>
-</div>
 {% endblock %}

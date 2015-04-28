@@ -1,24 +1,34 @@
-<html>
-
-<body>
-
-<h1>New Movie</h1>
-
-<form action="{{url_for('newMovie', director_id = director_id)}}" method = 'post'>
-
-
-	<p>Name:</p>
-		<input type ='text' size='30' name='name'>
-	<p>Image:</p>
-		<input type ='text' size='100' name='image' placeholder='Please enter URL for the image.'>
-	<p>Trailer:</p>
-		<input type ='text' size='100' name='trailer' placeholder='Please enter URL for the trailer.'>
-	<p>Description:</p>
-		<textarea rows='5' cols='55' name='description' placeholder='Please enter some short biography for the director.'></textarea>
-	<p><input type='submit' value='Create'></p>
-
-
+{% extends "layout.html" %}
+{% block title %}New Movie{% endblock %}
+{% block content %}
+<form class="form-horizontal" action="{{url_for('newMovie', director_id = director_id)}}" method = "post">
+	<div class="form-group">
+		<label for="inputName" class="col-sm-2 control-label">Name</label>
+		<div class="col-xs-4"><input type ="text" class="form-control" name="name"></div>
+	</div>
+	<div class="form-group">
+		<label for="inputImage" class="col-sm-2 control-label">Image</label>
+		<div class="col-xs-9">
+			<input type ="text" class="form-control" name="image" placeholder="Please enter URL for the image.">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputImage" class="col-sm-2 control-label">Trailer</label>
+		<div class="col-xs-9">
+			<input type ="text" class="form-control" name="trailer" placeholder="Please enter URL for the trailer.">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputDescription" class="col-sm-2 control-label">Description</label>
+		<div class="col-xs-9">
+			<textarea class="form-control" rows="5" name="description"
+			placeholder="Please enter some short description for the movie."></textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-primary">Create</button>
+		</div>
+	</div>
 </form>
-</body>
-
-</html>
+{% endblock %}

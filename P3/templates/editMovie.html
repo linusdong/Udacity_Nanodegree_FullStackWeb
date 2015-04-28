@@ -1,24 +1,40 @@
-<html>
-
-<body>
-
+{% extends "layout.html" %}
+{% block title %}Edit {{movie.name}}{% endblock %}
+{% block content %}
 <h1>Edit {{movie.name}}</h1>
-
-<form action="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}" method = 'post'>
-
-
-	<p>Name:</p>
-		<input type ='text' size='30' name='name' placeholder='{{movie.name}}'>
-	<p>Image:</p>
-		<input type ='text' size='100' name='image' placeholder='{{movie.image}}'>
-	<p>Trailer:</p>
-		<input type ='text' size='100' name='trailer' placeholder='{{movie.trailer}}'>
-	<p>Description:</p>
-		<textarea rows='5' cols='55' name='description' placeholder='{{movie.description}}'></textarea>
-	<p><input type='submit' value='Edit'></p>
-
-
+<form class="form-horizontal" action="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}" method = "post">
+	<div class="form-group">
+		<label for="inputName" class="col-sm-2 control-label">Name</label>
+		<div class="col-xs-4"><input type ="text" class="form-control" name="name" placeholder="{{movie.name}}"></div>
+	</div>
+	<div class="form-group">
+		<label for="inputImage" class="col-sm-2 control-label">Image</label>
+		<div class="col-xs-9">
+			<input type ="text" class="form-control" name="image" placeholder="{{movie.image}}">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputImage" class="col-sm-2 control-label">Trailer</label>
+		<div class="col-xs-9">
+			<input type ="text" class="form-control" name="trailer" placeholder="{{movie.trailer}}">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputDescription" class="col-sm-2 control-label">Description</label>
+		<div class="col-xs-9">
+			<textarea class="form-control" rows="5" name="description"
+			placeholder="{{movie.description}}"></textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-primary">Edit</button>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<a href="{{url_for('listDirector', director_id = movie.director_id)}}" class="btn btn-default" role="button">Cancel</a>
+		</div>
+	</div>
 </form>
-</body>
-
-</html>
+{% endblock %}

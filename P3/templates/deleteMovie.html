@@ -1,17 +1,17 @@
-<html>
-
-<body>
-
+{% extends "layout.html" %}
+{% block title %}Delete {{movie.name}}{% endblock %}
+{% block content %}
 <h1>Delete {{movie.name}}</h1>
-
-<form action="{{url_for('deleteMovie', director_id = movie.director_id, movie_id = movie.id)}}" method = 'post'>
-
-
-<input type='submit' value='Confirm'>
-
-
+<form class="form-horizontal" action="{{url_for('deleteMovie', director_id = movie.director_id, movie_id = movie.id)}}" method = "post">
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-primary">Confirm</button>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<a href="{{url_for('listDirector', director_id = movie.director_id)}}" class="btn btn-default" role="button">Cancel</a>
+		</div>
+	</div>
 </form>
-<a href = "{{url_for('listDirector', director_id = movie.director_id)}}"> Cancel </a>
-</body>
-
-</html>
+{% endblock %}
