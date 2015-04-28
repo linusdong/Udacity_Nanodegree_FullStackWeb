@@ -93,7 +93,7 @@ def editDirector(director_id):
 		session.add(editedDirector)
 		session.commit()
 		flash("Director Edited Successfully!")
-		return redirect(url_for('listDirector', director = editedDirector))
+		return redirect(url_for('listDirector', director_id = director_id))
 	else:
 		return render_template('editDirector.html', director = editedDirector)
 
@@ -144,7 +144,7 @@ def newMovie(director_id):
 		session.add(newMovie)
 		session.commit()
 		flash("Movie Created Successfully!")
-		return redirect(url_for('listDirector', director = director))
+		return redirect(url_for('listDirector', director_id = director_id))
 	else:
 		return render_template('newMovie.html', director_id = director_id)
 
@@ -166,7 +166,7 @@ def editMovie(director_id, movie_id):
 		session.add(editedMovie)
 		session.commit()
 		flash("Movie Edited Successfully!")
-		return redirect(url_for('listDirector', director = director))
+		return redirect(url_for('listMovie', director_id = director_id, movie_id = movie_id))
 	else:
 		return render_template('editMovie.html', movie = editedMovie)
 
@@ -187,7 +187,7 @@ def deleteMovie(director_id, movie_id):
 		session.delete(directorToDelete)
 		session.commit()
 		flash("Movie Deleted Successfully!")
-		return redirect(url_for('listDirector', director = director))
+		return redirect(url_for('listDirector', director_id = director_id))
 	else:
 		return render_template('deleteMovie.html', movie = movieToDelete)
 
