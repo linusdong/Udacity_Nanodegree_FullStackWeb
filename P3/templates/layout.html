@@ -11,6 +11,14 @@
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
     <title>{% block title %}{% endblock %} - Linus Webpage</title>
+    <script type="text/javascript" charset="utf-8">
+    // Animate in the movies when the page loads
+    $(document).ready(function () {
+      $('.movie-tile').hide().first().show("fast", function showNext() {
+        $(this).next("div").show("fast", showNext);
+      });
+    });
+    </script>
     {% endblock %}
   </head>
   <body>
@@ -27,7 +35,7 @@
     </div>
     <div id="footer">
       {% block footer %}
-      <p class="center">&copy; Copyright 2015 by <a href="www.linkedin.com/in/jianxidong">Linus Dong</a>.</p>
+      <p class="center">&copy; Copyright 2015 by <a href="http://www.linkedin.com/in/jianxidong">Linus Dong</a>.</p>
       {% endblock %}
     </div>
   </body>
