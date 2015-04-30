@@ -1,4 +1,4 @@
-{% extends "layout.html" %} {% block title %}Linus' favourite directors{% endblock %} {% block navbar %} { super() }} {% if user %}
+{% extends "layout.html" %} {% block title %}Linus' favourite directors{% endblock %} {% block navbar %} {{ super() }} {% if user %}
 <ul class="nav navbar-nav">
     <li>
         <a href="{{url_for('newDirector')}}"> Add director</a>
