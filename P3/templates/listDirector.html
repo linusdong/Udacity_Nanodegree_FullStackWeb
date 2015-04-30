@@ -1,4 +1,4 @@
-{% extends "layout.html" %} {% block title %}{{director.name}}{% endblock %} {% block navbar %} {% if user %}
+{% extends "layout.html" %} {% block title %}{{director.name}}{% endblock %} {% block navbar %} { super() }} {% if user %}
 <ul class="nav navbar-nav">
     <li>
         <a href="{{url_for('newMovie', director_id = director.id)}}"> Add Movie</a>

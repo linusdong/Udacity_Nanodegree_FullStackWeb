@@ -20,7 +20,7 @@ $(document).on('click', '.btn-trailer', function(event) {
     }));
 });
 </script>
-{% endblock %} {% block navbar %} {% if user %}
+{% endblock %} {% block navbar %} { super() }} {% if user %}
 <ul class="nav navbar-nav">
     <li>
         <a href="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}"> Edit Movie</a>
