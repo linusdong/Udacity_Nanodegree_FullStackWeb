@@ -9,22 +9,32 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+import datetime
+
+now = datetime.datetime.now()
+
 #Create dummy user
-User1 = User(	name="Jianxi Dong",
+User1 = User(	last_update=now,
+				create_date=now,
+				name="Jianxi Dong",
 				email="linusdong@gmail.com",
 				image='https://pbs.twimg.com/profile_images/2671170543/18debd694829ed78203a5a36dd364160_400x400.png')
 session.add(User1)
 session.commit()
 
 #Create dummy user
-User1 = User(	name="Robo Barista",
+User1 = User(	last_update=now,
+				create_date=now,
+				name="Robo Barista",
 				email="tinnyTim@udacity.com",
 				image='https://pbs.twimg.com/profile_images/2671170543/18debd694829ed78203a5a36dd364160_400x400.png')
 session.add(User1)
 session.commit()
 
 #Movies for Martin Scorsese
-director1 = Director(	user_id=1,
+director1 = Director(	last_update=now,
+						create_date=now,
+						user_id=1,
 						name = "Martin Scorsese",
 						bio = "Martin Charles Scorsese is an American director, producer, screenwriter, actor, and film historian. Part of the New Hollywood wave of filmmaking, he is widely regarded as one of the most significant and influential filmmakers in cinema history.",
 						image = "http://ia.media-imdb.com/images/M/MV5BMTcyNDA4Nzk3N15BMl5BanBnXkFtZTcwNDYzMjMxMw@@._V1._SX140_CR0,0,140,209_.jpg")
@@ -32,7 +42,9 @@ director1 = Director(	user_id=1,
 session.add(director1)
 session.commit()
 
-movie1 = Movie(	user_id=1,
+movie1 = Movie(	last_update=now,
+				create_date=now,
+				user_id=1,
 				name = "The Wolf of Wall Street",
 				image = "http://ia.media-imdb.com/images/M/MV5BMjIxMjgxNTk0MF5BMl5BanBnXkFtZTgwNjIyOTg2MDE@._V1_SX214_AL_.jpg",
 				trailer = "iszwuX1AK6A",
@@ -41,7 +53,9 @@ movie1 = Movie(	user_id=1,
 session.add(movie1)
 session.commit()
 
-movie2 = Movie(	user_id=1,
+movie2 = Movie(	last_update=now,
+				create_date=now,
+				user_id=1,
 				name = "Hugo",
 				image = "http://ia.media-imdb.com/images/M/MV5BMjAzNzk5MzgyNF5BMl5BanBnXkFtZTcwOTE4NDU5Ng@@._V1_SX214_AL_.jpg",
 				trailer = "hR-kP-olcpM",
@@ -50,7 +64,9 @@ movie2 = Movie(	user_id=1,
 session.add(movie2)
 session.commit()
 
-movie3 = Movie(	user_id=1,
+movie3 = Movie(	last_update=now,
+				create_date=now,
+				user_id=1,
 				name = "Shutter Island",
 				image = "http://ia.media-imdb.com/images/M/MV5BMTMxMTIyNzMxMV5BMl5BanBnXkFtZTcwOTc4OTI3Mg@@._V1_SX214_AL_.jpg",
 				trailer = "5iaYLCiq5RM",
@@ -60,7 +76,9 @@ session.add(movie3)
 session.commit()
 
 #Movies for George Lucas
-director1 = Director(	user_id=2,
+director1 = Director(	last_update=now,
+						create_date=now,
+						user_id=2,
 						name = "George Lucas",
 						bio = "George Walton Lucas, Jr. is an American film director, screenwriter, producer, and entrepreneur. He founded Lucasfilm and led the company as chairman and chief executive before selling it to The Walt Disney Company on October 30, 2012.",
 						image = "http://ia.media-imdb.com/images/M/MV5BMTA0Mjc0NzExNzBeQTJeQWpwZ15BbWU3MDEzMzQ3MDI@._V1._SY209_CR1,0,140,209_.jpg")
@@ -68,7 +86,9 @@ director1 = Director(	user_id=2,
 session.add(director1)
 session.commit()
 
-movie1 = Movie(	user_id=2,
+movie1 = Movie(	last_update=now,
+				create_date=now,
+				user_id=2,
 				name = "Star Wars: Episode IV - A New Hope",
 				image = "http://ia.media-imdb.com/images/M/MV5BMTU4NTczODkwM15BMl5BanBnXkFtZTcwMzEyMTIyMw@@._V1_SX214_AL_.jpg",
 				trailer = "vZ734NWnAHA",

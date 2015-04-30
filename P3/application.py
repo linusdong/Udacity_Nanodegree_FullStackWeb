@@ -20,6 +20,12 @@ import json
 from flask import make_response
 import requests
 
+#IMPORTS FOR ATOMFEED
+from urlparse import urljoin
+from werkzeug.contrib.atom import AtomFeed
+import datetime
+
+
 CLIENT_ID = json.loads(
 	open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME= "Linus Movie App"
@@ -30,10 +36,16 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+#Url helper functions
+def make_external(url):
+	return urljoin(request.url_root, url)
+
 #User Helper Functions
 def createUser(login_session):
+	now = datetime.datetime.now()
 	newUser = User(	name = login_session['username'], email = login_session['email'],
-					image = login_session['image'])
+					image = login_session['image'], last_update = now,
+					create_date = now)
 	session.add(newUser)
 	session.commit()
 	user = session.query(User).filter_by(email = login_session['email']).one()
@@ -213,19 +225,37 @@ def directorsJSON():
 	directors = session.query(Director).all()
 	return jsonify(directors= [d.serialize for d in directors])
 
+@app.route('/recent.atom')
+def recent_feed():
+	movies = session.query(Movie).order_by(Movie.create_date.desc())\
+					.limit(15).all()
+	feed = AtomFeed('Recent Movies',
+					feed_url=request.url, url=request.url_root)
+	for movie in movies:
+		movie_url = 'director/{director_id}/movie/{movie_id}'\
+				.format(director_id = movie.director_id, movie_id = movie.id)
+		rendered_text = movie.description
+		feed.add(movie.name, unicode(rendered_text),
+				 content_type='html',
+				 trailer=movie.trailer,
+				 url=make_external(movie_url),
+				 updated=movie.last_update)
+	return feed.get_response()
+
+
 # list movie directors
 @app.route('/')
 @app.route('/directors/')
 @app.route('/directors')
 def listAllDirectors():
 	directors = session.query(Director).all()
-	if not directors:
-		flash("No director on the list. Let's add one")
 	if 'user_id' not in login_session:
 		user  = None
 	else:
 		user = getUserInfo(login_session['user_id'])
 		directors = session.query(Director).filter_by(user_id = user.id).all()
+	if not directors:
+		flash("No director on the list. Let's add one")
 	return render_template('index.html', directors = directors, user = user)
 
 # Create new movie director
@@ -234,7 +264,9 @@ def newDirector():
 	if 'user_id' not in login_session:
 		return redirect('/login')
 	if request.method == 'POST':
-		newDirector = Director(	user_id = login_session['user_id'],
+		now = datetime.datetime.now()
+		newDirector = Director(	create_date = now, last_update = now,
+								user_id = login_session['user_id'],
 								name = request.form['name'], 
 								image = request.form['image'],
 								bio = request.form['bio'])
@@ -262,6 +294,8 @@ def editDirector(director_id):
 			editedDirector.image = request.form['image']
 		if request.form['bio']:
 			editedDirector.bio = request.form['bio']
+		now = datetime.datetime.now()
+		editedDirector.last_update = now
 		session.add(editedDirector)
 		session.commit()
 		flash("Director Edited Successfully!")
@@ -325,7 +359,9 @@ def newMovie(director_id):
 	if request.method == 'POST':
 		# strip out youtube id
 		trailer_id = getYoutubeId(request.form['trailer'])
-		newMovie = Movie(	user_id = login_session['user_id'],
+		now = datetime.datetime.now()
+		newMovie = Movie(	create_date = now, last_update = now,
+							user_id = login_session['user_id'],
 							name = request.form['name'],
 							image = request.form['image'],
 							trailer = trailer_id,
@@ -358,6 +394,8 @@ def editMovie(director_id, movie_id):
 		if request.form['trailer']:
 			trailer_id = getYoutubeId(request.form['trailer'])
 			editedMovie.trailer = trailer_id
+		now = datetime.datetime.now()
+		editedMovie.last_update = now
 		session.add(editedMovie)
 		session.commit()
 		flash("Movie Edited Successfully!")

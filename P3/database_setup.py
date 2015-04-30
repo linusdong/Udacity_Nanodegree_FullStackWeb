@@ -14,16 +14,20 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     image = Column(String)
+    create_date = Column(Date, nullable=False)
+    last_update = Column(Date)
 
 class Director(Base):
     __tablename__ = 'director'
    
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    name = Column(String, nullable=False)
     bio = Column(String)
-    image = Column(String(250))
+    image = Column(String)
     user_id = Column(Integer,ForeignKey('user.id'))
     user = relationship(User)
+    create_date = Column(Date, nullable=False)
+    last_update = Column(Date)
 
     @property
     def serialize(self):
@@ -34,20 +38,22 @@ class Director(Base):
            'bio'         : self.bio,
            'image'         : self.image,
        }
- 
+
 class Movie(Base):
     __tablename__ = 'movie'
 
 
-    name =Column(String(80), nullable = False)
+    name =Column(String, nullable = False)
     id = Column(Integer, primary_key = True)
     description = Column(String)
-    trailer = Column(String(250))
-    image = Column(String(250))
+    trailer = Column(String)
+    image = Column(String)
     director_id = Column(Integer,ForeignKey('director.id'))
     director = relationship(Director)
     user_id = Column(Integer,ForeignKey('user.id'))
     user = relationship(User)
+    create_date = Column(Date, nullable=False)
+    last_update = Column(Date)
 
     @property
     def serialize(self):
