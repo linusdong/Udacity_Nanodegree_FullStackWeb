@@ -21,13 +21,11 @@ $(document).on('click', '.btn-trailer', function(event) {
 });
 </script>
 {% endblock %} {% block navbar %} {% if user %}
-<div class="collapse navbar-collapse">
-    <ul class="nav navbar-nav">
-        <li>
-            <a href="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}"> Edit Movie</a>
-        </li>
-    </ul>
-</div>
+<ul class="nav navbar-nav">
+    <li>
+        <a href="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}"> Edit Movie</a>
+    </li>
+</ul>
 {% endif %} {% endblock %} {% block content %}
 <!--MESSAGE FLASHING EXAMPLE index start-->
 {% with messages = get_flashed_messages() %} {% if messages %}

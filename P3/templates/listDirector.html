@@ -1,11 +1,9 @@
 {% extends "layout.html" %} {% block title %}{{director.name}}{% endblock %} {% block navbar %} {% if user %}
-<div class="collapse navbar-collapse">
-    <ul class="nav navbar-nav">
-        <li>
-            <a href="{{url_for('newMovie', director_id = director.id)}}"> Add Movie</a>
-        </li>
-    </ul>
-</div>
+<ul class="nav navbar-nav">
+    <li>
+        <a href="{{url_for('newMovie', director_id = director.id)}}"> Add Movie</a>
+    </li>
+</ul>
 {% endif %} {% endblock %} {% block content %}
 <!--MESSAGE FLASHING EXAMPLE index start-->
 {% with messages = get_flashed_messages() %} {% if messages %}

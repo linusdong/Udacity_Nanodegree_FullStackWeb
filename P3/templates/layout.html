@@ -30,14 +30,17 @@
                 <div class="navbar-header">
                     <a class="navbar-brand" href="{{url_for('listAllDirectors')}}">Linus' favourite directors</a>
                 </div>
-                {% block navbar %}{% endblock %} {% if 'user_id' not in session %}
-                <p class="navbar-text navbar-right"><a href="{{url_for('showLogin')}}" class="navbar-link">Sign in</a></p>
-                {% else %}
-                <p class="navbar-text navbar-right"><a href="{{url_for('disconnect')}}" class="navbar-link">Sign out</a></p>
-                {% endif %}
+                <div class="collapse navbar-collapse">
+                    {% block navbar %}{% endblock %} {% if 'user_id' not in session %}
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="{{url_for('showLogin')}}" class="navbar-link">Sign in</a></li>
+                        {% else %}
+                        <li><a href="{{url_for('disconnect')}}" class="navbar-link">Sign out</a></li>
+                    </ul>{% endif %}
+                </div>
             </div>
         </div>
-        {% block content %}{% endblock %}
+        {% block content %} {% endblock %}
     </div>
     <div id="footer">
         {% block footer %}
