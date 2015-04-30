@@ -1,17 +1,15 @@
-{% extends "layout.html" %}
-{% block title %}Delete {{director.name}}{% endblock %}
-{% block content %}
+{% extends "layout.html" %} {% block title %}Delete {{director.name}}{% endblock %} {% block content %}
 <h1>Delete {{director.name}}</h1>
-<form class="form-horizontal" action="{{url_for('deleteDirector', director_id = director.id)}}" method = "post">
-	<div class="form-group">
-		<div class="col-sm-offset-2 col-sm-10">
-			<button type="submit" class="btn btn-primary">Confirm</button>
-		</div>
-	</div>
-	<div class="form-group">
-		<div class="col-sm-offset-2 col-sm-10">
-			<a href="{{url_for('listAllDirectors')}}" class="btn btn-default" role="button">Cancel</a>
-		</div>
-	</div>
+<form class="form-horizontal" action="{{url_for('deleteDirector', director_id = director.id)}}" method="post">
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary">Confirm</button>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <a href="{{url_for('listAllDirectors')}}" class="btn btn-default" role="button">Cancel</a>
+        </div>
+    </div>
 </form>
 {% endblock %}

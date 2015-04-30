@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     {% block head %}
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <!-- Latest compiled and minified CSS -->
@@ -13,30 +14,32 @@
     <title>{% block title %}{% endblock %} - Linus Webpage</title>
     <script type="text/javascript" charset="utf-8">
     // Animate in the movies when the page loads
-    $(document).ready(function () {
-      $('.movie-tile').hide().first().show("fast", function showNext() {
-        $(this).next("div").show("fast", showNext);
-      });
+    $(document).ready(function() {
+        $('.movie-tile').hide().first().show("fast", function showNext() {
+            $(this).next("div").show("fast", showNext);
+        });
     });
     </script>
     {% endblock %}
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="content">
-      <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container-fluid">
-          <div class="navbar-header">
-              <a class="navbar-brand" href="{{url_for('listAllDirectors')}}">Linus' favourite directors</a>
-          </div>
-          {% block navbar %}{% endblock %}
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="{{url_for('listAllDirectors')}}">Linus' favourite directors</a>
+                </div>
+                {% block navbar %}{% endblock %}
+            </div>
         </div>
-      </div>
-      {% block content %}{% endblock %}
+        {% block content %}{% endblock %}
     </div>
     <div id="footer">
-      {% block footer %}
-      <p class="center">Created in 2015 by <a href="http://www.linkedin.com/in/jianxidong">Linus Dong</a>.</p>
-      {% endblock %}
+        {% block footer %}
+        <p class="center">Created in 2015 by <a href="http://www.linkedin.com/in/jianxidong">Linus Dong</a>.</p>
+        {% endblock %}
     </div>
-  </body>
+</body>
+
 </html>

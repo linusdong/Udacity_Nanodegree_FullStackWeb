@@ -1,28 +1,27 @@
-{% extends "layout.html" %}
-{% block title %}New Director{% endblock %}
-{% block content %}
-<form class="form-horizontal" action="{{url_for('newDirector')}}" method = "post">
-	<div class="form-group">
-		<label for="inputName" class="col-sm-2 control-label">Name</label>
-		<div class="col-xs-4"><input type ="text" class="form-control" name="name"></div>
-	</div>
-	<div class="form-group">
-		<label for="inputImage" class="col-sm-2 control-label">Image</label>
-		<div class="col-xs-9">
-			<input type ="text" class="form-control" name="image" placeholder="Please enter URL for the image.">
-		</div>
-	</div>
-	<div class="form-group">
-		<label for="inputDescription" class="col-sm-2 control-label">Biography</label>
-		<div class="col-xs-9">
-			<textarea class="form-control" rows="5" name="bio"
-			placeholder="Please enter some short biography for the director."></textarea>
-		</div>
-	</div>
-	<div class="form-group">
-		<div class="col-sm-offset-2 col-sm-10">
-			<button type="submit" class="btn btn-primary">Create</button>
-		</div>
-	</div>
+{% extends "layout.html" %} {% block title %}New Director{% endblock %} {% block content %}
+<form class="form-horizontal" action="{{url_for('newDirector')}}" method="post">
+    <div class="form-group">
+        <label for="inputName" class="col-sm-2 control-label">Name</label>
+        <div class="col-xs-4">
+            <input type="text" class="form-control" name="name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputImage" class="col-sm-2 control-label">Image</label>
+        <div class="col-xs-9">
+            <input type="text" class="form-control" name="image" placeholder="Please enter URL for the image.">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputDescription" class="col-sm-2 control-label">Biography</label>
+        <div class="col-xs-9">
+            <textarea class="form-control" rows="5" name="bio" placeholder="Please enter some short biography for the director."></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+    </div>
 </form>
 {% endblock %}
