@@ -114,6 +114,7 @@ def gconnect():
 		return response
 		
 	# Store the access token in the session for later use.
+	login_session['provider'] = 'google'
 	login_session['credentials'] = credentials
 	login_session['gplus_id'] = gplus_id
  
@@ -126,7 +127,7 @@ def gconnect():
 	data = answer.json()
 
 	login_session['username'] = data['name']
-	login_session['image'] = data['image']
+	login_session['image'] = data['picture']
 	login_session['email'] = data['email']
 
 	#see if user exists, if it doesn't make a new one
@@ -165,9 +166,6 @@ def gdisconnect():
 		#Reset the user's sesson.
 		del login_session['credentials']
 		del login_session['gplus_id']
-		del login_session['username']
-		del login_session['email']
-		del login_session['image']
 
 		response = make_response(json.dumps('Successfully disconnected.'), 200)
 		response.headers['Content-Type'] = 'application/json'
@@ -180,6 +178,7 @@ def gdisconnect():
 		response.headers['Content-Type'] = 'application/json'
 		return response
 
+
 # helper function to check original creator,
 # if the creator is not match the current user,
 # redirect to the index page that match current user
@@ -187,8 +186,9 @@ def checkCreator(user_id):
 	creator = getUserInfo(user_id)
 	if creator.id != login_session['user_id']:
 		flash("ERROR, the information is not belong to {name}.".format(
-			name = creator.name))
-		return redirect(url_for('listAllDirectors'))
+			name = login_session['username']))
+		return False
+	return True
 
 # Extract the youtube ID from the url
 def getYoutubeId(youtube_url):
@@ -252,7 +252,9 @@ def editDirector(director_id):
 	if 'user_id' not in login_session:
 		return redirect('/login')
 	editedDirector = session.query(Director).filter_by(id = director_id).one()
-	checkCreator(editedDirector.user_id)
+	iAmCreator = checkCreator(editedDirector.user_id)
+	if iAmCreator != True:
+		return redirect(url_for('listAllDirectors'))
 	if request.method == 'POST':
 		if request.form['name']:
 			editedDirector.name = request.form['name']
@@ -279,7 +281,9 @@ def listDirector(director_id):
 		user  = None
 	else:
 		user = "user is logined."
-		checkCreator(director.user_id)
+		iAmCreator = checkCreator(director.user_id)
+		if iAmCreator != True:
+			return redirect(url_for('listAllDirectors'))
 	return render_template('listDirector.html', director = director,
 												movies = movies,
 												user = user)
@@ -290,7 +294,9 @@ def deleteDirector(director_id):
 	if 'user_id' not in login_session:
 		return redirect('/login')
 	directorToDelete = session.query(Director).filter_by(id = director_id).one()
-	checkCreator(directorToDelete.user_id)
+	iAmCreator = checkCreator(directorToDelete.user_id)
+	if iAmCreator != True:
+		return redirect(url_for('listAllDirectors'))
 	moviesToDelete = session.query(Movie).filter_by(director_id = director_id).all()
 	if request.method == 'POST':
 		for movie in moviesToDelete:
@@ -339,7 +345,9 @@ def editMovie(director_id, movie_id):
 	if 'user_id' not in login_session:
 		return redirect('/login')
 	editedMovie = session.query(Movie).filter_by(id = movie_id).one()
-	checkCreator(editedMovie.user_id)
+	iAmCreator = checkCreator(editedMovie.user_id)
+	if iAmCreator != True:
+		return redirect(url_for('listAllDirectors'))
 	if request.method == 'POST':
 		if request.form['name']:
 			editedMovie.name = request.form['name']
@@ -368,7 +376,9 @@ def listMovie(director_id, movie_id):
 		user  = None
 	else:
 		user = "user is logined."
-		checkCreator(movie.user_id)
+		iAmCreator = checkCreator(movie.user_id)
+		if iAmCreator != True:
+			return redirect(url_for('listAllDirectors'))
 	return render_template('listMovie.html', 	movie = movie,
 												director = director,
 												user = user)
@@ -381,7 +391,9 @@ def deleteMovie(director_id, movie_id):
 		return redirect('/login')
 	director = session.query(Director).filter_by(id = director_id).one()
 	movieToDelete = session.query(Movie).filter_by(id = movie_id).one()
-	checkCreator(movieToDelete.user_id)
+	iAmCreator = checkCreator(movieToDelete.user_id)
+	if iAmCreator != True:
+		return redirect(url_for('listAllDirectors'))
 	if request.method == 'POST':
 		session.delete(movieToDelete)
 		session.commit()
@@ -389,6 +401,23 @@ def deleteMovie(director_id, movie_id):
 		return redirect(url_for('listDirector', director_id = director_id))
 	else:
 		return render_template('deleteMovie.html', movie = movieToDelete)
+
+#Disconnect based on provider
+@app.route('/disconnect')
+def disconnect():
+	if 'provider' in login_session:
+		if login_session['provider'] == 'google':
+			gdisconnect()
+		del login_session['username']
+		del login_session['email']
+		del login_session['image']
+		del login_session['user_id']
+		del login_session['provider']
+		flash("You have been logged out.")
+		return redirect(url_for('listAllDirectors'))
+	else:
+		flash("You were not logged in")
+		return redirect(url_for('listAllDirectors'))
 
 if __name__ == '__main__':
 	app.secret_key = 'super_secret_key'

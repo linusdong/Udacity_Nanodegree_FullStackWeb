@@ -30,7 +30,11 @@
                 <div class="navbar-header">
                     <a class="navbar-brand" href="{{url_for('listAllDirectors')}}">Linus' favourite directors</a>
                 </div>
-                {% block navbar %}{% endblock %}
+                {% block navbar %}{% endblock %} {% if 'user_id' not in session %}
+                <p class="navbar-text navbar-right"><a href="{{url_for('showLogin')}}" class="navbar-link">Sign in</a></p>
+                {% else %}
+                <p class="navbar-text navbar-right"><a href="{{url_for('disconnect')}}" class="navbar-link">Sign out</a></p>
+                {% endif %}
             </div>
         </div>
         {% block content %}{% endblock %}
