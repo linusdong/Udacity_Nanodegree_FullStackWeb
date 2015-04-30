@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Director, Base, Movie
+from database_setup import Director, Base, Movie, User
 
 from flask import session as login_session
 import random, string
