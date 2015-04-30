@@ -30,6 +30,25 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+#User Helper Functions
+def createUser(login_session):
+	newUser = User(	name = login_session['username'], email = login_session['email'],
+					image = login_session['image'])
+	session.add(newUser)
+	session.commit()
+	user = session.query(User).filter_by(email = login_session['email']).one()
+	return user.id
+
+def getUserInfo(user_id):
+	user = session.query(User).filter_by(id = user_id).one()
+	return user
+
+def getUserID(email):
+	try:
+		user = session.query(User).filter_by(email = email).one()
+		return user.id
+	except:
+		return None
 
 #Create anti-forgery state token
 @app.route('/login')
@@ -107,16 +126,21 @@ def gconnect():
 	data = answer.json()
 
 	login_session['username'] = data['name']
-	login_session['picture'] = data['picture']
+	login_session['image'] = data['image']
 	login_session['email'] = data['email']
 
+	#see if user exists, if it doesn't make a new one
+	user_id = getUserID(login_session['email'])
+	if not user_id:
+		user_id = createUser(login_session)
+	login_session['user_id'] = user_id
 
 	output = ''
 	output +='<h1>Welcome, '
 	output += login_session['username']
 	output += '!</h1>'
 	output += '<img src="'
-	output += login_session['picture']
+	output += login_session['image']
 	output +=' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
 	flash("You are now logged in as %s"%login_session['username'])
 	print "done!"
@@ -143,7 +167,7 @@ def gdisconnect():
 		del login_session['gplus_id']
 		del login_session['username']
 		del login_session['email']
-		del login_session['picture']
+		del login_session['image']
 
 		response = make_response(json.dumps('Successfully disconnected.'), 200)
 		response.headers['Content-Type'] = 'application/json'
@@ -155,6 +179,16 @@ def gdisconnect():
 					.format(reason = reason), 400))
 		response.headers['Content-Type'] = 'application/json'
 		return response
+
+# helper function to check original creator,
+# if the creator is not match the current user,
+# redirect to the index page that match current user
+def checkCreator(user_id):
+	creator = getUserInfo(user_id)
+	if creator.id != login_session['user_id']:
+		flash("ERROR, the information is not belong to {name}.".format(
+			name = creator.name))
+		return redirect(url_for('listAllDirectors'))
 
 # Extract the youtube ID from the url
 def getYoutubeId(youtube_url):
@@ -187,19 +221,21 @@ def listAllDirectors():
 	directors = session.query(Director).all()
 	if not directors:
 		flash("No director on the list. Let's add one")
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		user  = None
 	else:
-		user = "user is logined."
+		user = getUserInfo(login_session['user_id'])
+		directors = session.query(Director).filter_by(user_id = user.id).all()
 	return render_template('index.html', directors = directors, user = user)
 
 # Create new movie director
 @app.route('/director/new', methods=['GET','POST'])
 def newDirector():
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		return redirect('/login')
 	if request.method == 'POST':
-		newDirector = Director(	name = request.form['name'], 
+		newDirector = Director(	user_id = login_session['user_id'],
+								name = request.form['name'], 
 								image = request.form['image'],
 								bio = request.form['bio'])
 		session.add(newDirector)
@@ -209,12 +245,14 @@ def newDirector():
 	else:
 		return render_template('newDirector.html')
 
+
 # Update movie director information
 @app.route('/director/<int:director_id>/edit', methods=['GET','POST'])
 def editDirector(director_id):
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		return redirect('/login')
 	editedDirector = session.query(Director).filter_by(id = director_id).one()
+	checkCreator(editedDirector.user_id)
 	if request.method == 'POST':
 		if request.form['name']:
 			editedDirector.name = request.form['name']
@@ -237,10 +275,11 @@ def listDirector(director_id):
 	movies = session.query(Movie).filter_by(director_id = director_id).all()
 	if not movies:
 		flash("No movie on the list. Let's add one")
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		user  = None
 	else:
 		user = "user is logined."
+		checkCreator(director.user_id)
 	return render_template('listDirector.html', director = director,
 												movies = movies,
 												user = user)
@@ -248,9 +287,10 @@ def listDirector(director_id):
 # Delete Movie director information
 @app.route('/director/<int:director_id>/delete', methods=['GET','POST'])
 def deleteDirector(director_id):
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		return redirect('/login')
 	directorToDelete = session.query(Director).filter_by(id = director_id).one()
+	checkCreator(directorToDelete.user_id)
 	moviesToDelete = session.query(Movie).filter_by(director_id = director_id).all()
 	if request.method == 'POST':
 		for movie in moviesToDelete:
@@ -273,13 +313,14 @@ def listAllMovies():
 # Create new movie
 @app.route('/director/<int:director_id>/movie/new', methods=['GET','POST'])
 def newMovie(director_id):
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		return redirect('/login')
 	director = session.query(Director).filter_by(id = director_id).one()
 	if request.method == 'POST':
 		# strip out youtube id
 		trailer_id = getYoutubeId(request.form['trailer'])
-		newMovie = Movie(	name = request.form['name'],
+		newMovie = Movie(	user_id = login_session['user_id'],
+							name = request.form['name'],
 							image = request.form['image'],
 							trailer = trailer_id,
 							description = request.form['description'],
@@ -295,10 +336,10 @@ def newMovie(director_id):
 @app.route('/director/<int:director_id>/movie/<int:movie_id>/edit',
 			methods=['GET','POST'])
 def editMovie(director_id, movie_id):
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		return redirect('/login')
-	director = session.query(Director).filter_by(id = director_id).one()
 	editedMovie = session.query(Movie).filter_by(id = movie_id).one()
+	checkCreator(editedMovie.user_id)
 	if request.method == 'POST':
 		if request.form['name']:
 			editedMovie.name = request.form['name']
@@ -323,10 +364,11 @@ def editMovie(director_id, movie_id):
 def listMovie(director_id, movie_id):
 	director = session.query(Director).filter_by(id = director_id).one()
 	movie = session.query(Movie).filter_by(id = movie_id).one()
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		user  = None
 	else:
 		user = "user is logined."
+		checkCreator(movie.user_id)
 	return render_template('listMovie.html', 	movie = movie,
 												director = director,
 												user = user)
@@ -335,10 +377,11 @@ def listMovie(director_id, movie_id):
 @app.route('/director/<string:director_id>/movie/<string:movie_id>/delete',
 			methods=['GET','POST'])
 def deleteMovie(director_id, movie_id):
-	if 'username' not in login_session:
+	if 'user_id' not in login_session:
 		return redirect('/login')
 	director = session.query(Director).filter_by(id = director_id).one()
 	movieToDelete = session.query(Movie).filter_by(id = movie_id).one()
+	checkCreator(movieToDelete.user_id)
 	if request.method == 'POST':
 		session.delete(movieToDelete)
 		session.commit()

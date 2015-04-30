@@ -7,6 +7,14 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
+class User(Base):
+    __tablename__ = 'user'
+   
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    image = Column(String)
+
 class Director(Base):
     __tablename__ = 'director'
    
@@ -14,6 +22,8 @@ class Director(Base):
     name = Column(String(250), nullable=False)
     bio = Column(String)
     image = Column(String(250))
+    user_id = Column(Integer,ForeignKey('user.id'))
+    user = relationship(User)
 
     @property
     def serialize(self):
@@ -35,7 +45,9 @@ class Movie(Base):
     trailer = Column(String(250))
     image = Column(String(250))
     director_id = Column(Integer,ForeignKey('director.id'))
-    director = relationship(Director) 
+    director = relationship(Director)
+    user_id = Column(Integer,ForeignKey('user.id'))
+    user = relationship(User)
 
     @property
     def serialize(self):
