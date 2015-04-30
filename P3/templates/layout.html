@@ -29,14 +29,21 @@
             <div class="container-fluid">
                 <div class="navbar-header">
                     <a class="navbar-brand" href="{{url_for('listAllDirectors')}}">Linus' favourite directors</a>
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
                 </div>
-                <div class="collapse navbar-collapse">
-                    {% block navbar %}{% endblock %} {% if 'user_id' not in session %}
-                    <ul class="nav navbar-nav navbar-right">
-                        <li><a href="{{url_for('showLogin')}}" class="navbar-link">Sign in</a></li>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    {% block navbar %} {% endblock %}
+                    <ul class="nav navbar-nav navbar-right"> {% if 'user_id' not in session %}
+                        <li><a href="{{url_for('showLogin')}}">Sign in</a></li>
                         {% else %}
-                        <li><a href="{{url_for('disconnect')}}" class="navbar-link">Sign out</a></li>
-                    </ul>{% endif %}
+                        <li><a href="{{url_for('disconnect')}}">Sign out</a></li>
+                        {% endif %}
+                    </ul>
                 </div>
             </div>
         </div>
