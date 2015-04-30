@@ -1,6 +1,9 @@
 # Item Catalog: Getting Started
 
 ## Change log
+* April 30th 2015, ATOM API for extra credit, secure web application
+* April 29th 2015, UPD styling on login/logout function.
+* April 28th 2015, COMPLETE basic styling through all web pages.
 * April 26th 2015, database setted. CURD methods implemented.
 * April 24th 2015, mock up templates in places.
 * April 21st 2015, initial commit. Readme file added.
@@ -44,6 +47,7 @@ In addition to the basic functions listed above, this project has many opportuni
 5. Run your application within the VM by typing python /vagrant/catalog/application.py into the Terminal. If you named the file from step 4 as something other than application.py, in the above command substitute in the file name on your computer.
 
 6. Access and test your application by visiting http://localhost:8000 locally on your browser.
+7. [atom api testing](http://localhost:8000/recent.atom)
 
 ## Project grading guideline
 ![Project grading guideline](./pics/project3rubric.png)
