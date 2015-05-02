@@ -76,10 +76,10 @@ python populatedatabase.py
 Access and test your application by visiting http://localhost:8000 locally on your browser.
 
 ### API/JSON testing
-[atom api testing](http://localhost:8000/recent.atom)
-[get all the director](#)
-[get all the movie from one director](#)
-[get movie by id](#)
+* [atom api testing](http://localhost:8000/recent.atom)
+* [get all the director](http://localhost:8000/directors/JSON)
+* [get all the movie from one director](http://localhost:8000/director/1/movies/JSON)
+* [get movie by id](http://localhost:8000/director/1/movie/1/JSON)
 
 ##Troubleshoot
 ###OAuth2Credentials object is not JSON serializable

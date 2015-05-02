@@ -13,13 +13,13 @@ from flask import session as login_session
 import random, string
 
 #IMPORTS FOR LOGIN
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
+from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 from oauth2client.client import AccessTokenCredentials
 import httplib2
 import json
 from flask import make_response
 import requests
+from functools import wraps
 
 #IMPORTS FOR ATOMFEED
 from urlparse import urljoin
@@ -36,6 +36,14 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+def login_required(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		if 'user_id' not in login_session:
+			return redirect('/login')
+		return f(*args, **kwargs)
+	return decorated_function
 
 #Url helper functions
 def make_external(url):
@@ -68,6 +76,26 @@ def getUserID(email):
 		return user.id
 	except:
 		return None
+
+def checkCreator(user_id):
+	'''helper function to check original creator
+	Return:
+		False, redirect to index page if not match
+	'''
+	creator = getUserInfo(user_id)
+	if creator.id != login_session['user_id']:
+		flash("ERROR, the information is not belong to "
+				"{name}.".format(name = login_session['username']))
+		return False
+	return True
+
+# Extract the youtube ID from the url
+def getYoutubeId(youtube_url):
+	youtube_id_match = re.search(r'(?<=v=)[^&#]+', youtube_url)
+	youtube_id_match = youtube_id_match or re.search(r'(?<=be/)[^&#]+', youtube_url)
+	youtube_id_match = youtube_id_match or re.search(r'(?<=embed/)[^&#]+', youtube_url)
+	trailer_youtube_id = youtube_id_match.group(0) if youtube_id_match else None
+	return trailer_youtube_id
 
 #Create anti-forgery state token
 @app.route('/login')
@@ -200,26 +228,7 @@ def gdisconnect():
 		response.headers['Content-Type'] = 'application/json'
 		return response
 
-
-# helper function to check original creator,
-# if the creator is not match the current user,
-# redirect to the index page that match current user
-def checkCreator(user_id):
-	creator = getUserInfo(user_id)
-	if creator.id != login_session['user_id']:
-		flash("ERROR, the information is not belong to "
-				"{name}.".format(name = login_session['username']))
-		return False
-	return True
-
-# Extract the youtube ID from the url
-def getYoutubeId(youtube_url):
-	youtube_id_match = re.search(r'(?<=v=)[^&#]+', youtube_url)
-	youtube_id_match = youtube_id_match or re.search(r'(?<=be/)[^&#]+', youtube_url)
-	youtube_id_match = youtube_id_match or re.search(r'(?<=embed/)[^&#]+', youtube_url)
-	trailer_youtube_id = youtube_id_match.group(0) if youtube_id_match else None
-	return trailer_youtube_id
-
+#main code
 @app.route('/director/<int:director_id>/movie/<int:movie_id>/JSON')
 def movieJSON(director_id, movie_id):
 	movie = session.query(Movie).filter_by(id = movie_id).one()
@@ -270,9 +279,8 @@ def listAllDirectors():
 
 # Create new movie director
 @app.route('/director/new', methods=['GET','POST'])
+@login_required
 def newDirector():
-	if 'user_id' not in login_session:
-		return redirect('/login')
 	if request.method == 'POST':
 		now = datetime.datetime.now()
 		newDirector = Director(	create_date = now, last_update = now,
@@ -290,9 +298,8 @@ def newDirector():
 
 # Update movie director information
 @app.route('/director/<int:director_id>/edit', methods=['GET','POST'])
+@login_required
 def editDirector(director_id):
-	if 'user_id' not in login_session:
-		return redirect('/login')
 	editedDirector = session.query(Director).filter_by(id = director_id).one()
 	iAmCreator = checkCreator(editedDirector.user_id)
 	if iAmCreator != True:
@@ -334,9 +341,8 @@ def listDirector(director_id):
 
 # Delete Movie director information
 @app.route('/director/<int:director_id>/delete', methods=['GET','POST'])
+@login_required
 def deleteDirector(director_id):
-	if 'user_id' not in login_session:
-		return redirect('/login')
 	directorToDelete = session.query(Director).filter_by(id = director_id).one()
 	iAmCreator = checkCreator(directorToDelete.user_id)
 	if iAmCreator != True:
@@ -362,9 +368,8 @@ def listAllMovies():
 
 # Create new movie
 @app.route('/director/<int:director_id>/movie/new', methods=['GET','POST'])
+@login_required
 def newMovie(director_id):
-	if 'user_id' not in login_session:
-		return redirect('/login')
 	director = session.query(Director).filter_by(id = director_id).one()
 	if request.method == 'POST':
 		# strip out youtube id
@@ -387,9 +392,8 @@ def newMovie(director_id):
 # Update movie information
 @app.route('/director/<int:director_id>/movie/<int:movie_id>/edit',
 			methods=['GET','POST'])
+@login_required
 def editMovie(director_id, movie_id):
-	if 'user_id' not in login_session:
-		return redirect('/login')
 	editedMovie = session.query(Movie).filter_by(id = movie_id).one()
 	iAmCreator = checkCreator(editedMovie.user_id)
 	if iAmCreator != True:
@@ -434,9 +438,8 @@ def listMovie(director_id, movie_id):
 # Delete Movie information
 @app.route('/director/<string:director_id>/movie/<string:movie_id>/delete',
 			methods=['GET','POST'])
+@login_required
 def deleteMovie(director_id, movie_id):
-	if 'user_id' not in login_session:
-		return redirect('/login')
 	director = session.query(Director).filter_by(id = director_id).one()
 	movieToDelete = session.query(Movie).filter_by(id = movie_id).one()
 	iAmCreator = checkCreator(movieToDelete.user_id)
