@@ -15,6 +15,7 @@ import random, string
 #IMPORTS FOR LOGIN
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
+from oauth2client.client import AccessTokenCredentials
 import httplib2
 import json
 from flask import make_response
@@ -38,6 +39,12 @@ session = DBSession()
 
 #Url helper functions
 def make_external(url):
+	"""Generate full path URL for external use.
+	Args:
+		url: internal URL.
+	Return:
+		A string with full path URL.
+	"""
 	return urljoin(request.url_root, url)
 
 #User Helper Functions
@@ -127,9 +134,11 @@ def gconnect():
 		
 	# Store the access token in the session for later use.
 	login_session['provider'] = 'google'
-	login_session['credentials'] = credentials
+	login_session['credentials'] = credentials.access_token
 	login_session['gplus_id'] = gplus_id
- 
+	# replace full crediential object
+	credentials = AccessTokenCredentials(login_session['credentials'],
+										 'user-agent-value')
 	
 	#Get user info
 	userinfo_url =  "https://www.googleapis.com/oauth2/v1/userinfo"
@@ -164,7 +173,8 @@ def gconnect():
 @app.route('/gdisconnect')
 def gdisconnect():
 	#Only disconnect a connected user.
-	credentials = login_session.get('credentials')
+	credentials = AccessTokenCredentials(login_session['credentials'],
+										 'user-agent-value')
 	if credentials is None:
 		response = make_response(json.dumps('Current user not connected.'),401)
 		response.headers['Content-Type'] = 'application/json'
@@ -197,8 +207,8 @@ def gdisconnect():
 def checkCreator(user_id):
 	creator = getUserInfo(user_id)
 	if creator.id != login_session['user_id']:
-		flash("ERROR, the information is not belong to {name}.".format(
-			name = login_session['username']))
+		flash("ERROR, the information is not belong to "
+				"{name}.".format(name = login_session['username']))
 		return False
 	return True
 

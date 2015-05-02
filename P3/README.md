@@ -1,23 +1,18 @@
-# Item Catalog: Getting Started
+# Item Catalog: Linus Movie App
 
 ## Change log
+* May 1st 2015, RFT and UPD project based on feedback. JSON error is gone, downgrade is not needed.
 * April 30th 2015, ATOM API for extra credit, secure web application
 * April 29th 2015, UPD styling on login/logout function.
 * April 28th 2015, COMPLETE basic styling through all web pages.
-* April 26th 2015, database setted. CURD methods implemented.
+* April 26th 2015, database settled. CURD methods implemented.
 * April 24th 2015, mock up templates in places.
 * April 21st 2015, initial commit. Readme file added.
 
 ## Project description
-In this project, you will be developing a web application that provides a list of items within a variety of categories and integrate third party user registration and authentication. Authenticated users should have the ability to post, edit, and delete their own items.
+The project is a extended version of [project1 movie trailer app](https://github.com/linusdong/Udacity_Nanodegree_FullStackWeb/tree/master/P1), with database persistent and Bootstarp CSS style theme, G+ sign in based on OAuth2 and Flask framework integration.
 
-You will be creating this project essentially from scratch, no templates have been provided for you. This means that you have free reign over the HTML, the CSS, and the files that include the application itself utilizing Flask.
-
-There are four parts that you will need to complete:
-* the HTML (structure of the pages)
-* the CSS (the style of the pages)
-* the Flask Application (to put it online) it must include authentication/authorization to allow users to login before making changes
-* the database (to store and organize the information)
+Authenticated users should have the ability to post, edit, and delete their own directors and movies.
 
 ### Additional Functionality
 In addition to the basic functions listed above, this project has many opportunities to go above and beyond what is required. Some ways to achieve exceeds specifications are to include the following requirements:
@@ -32,22 +27,78 @@ In addition to the basic functions listed above, this project has many opportuni
 
 5. CRUD: Delete: Research and implement this function using POST requests and nonces to prevent cross-site request forgeries (CSRF).
 
-6. Comments: Comments are not just a way for you to keep track of what you’re writing in terms of code, but also a great way to help other developers who may be reading your code. While comment preferences may differ from team to team, the general idea is that good comments cover the main purpose of the code, mention inputs and outputs, etc. Check out the comments section of PEP-8 and the Google Python Style Guide to get a better idea of good comments.
+6. Comments: Comments are not just a way for you to keep track of what you’re writing in terms of code, but also a great way to help other developers who may be reading your code. While comment preferences may differ from team to team, the general idea is that good comments cover the main purpose of the code, mention inputs and outputs, etc. Check out the comments section of [PEP-8](https://www.python.org/dev/peps/pep-0008/#comments) and the [Google Python Style Guide](https://google-styleguide.googlecode.com/svn/trunk/pyguide.html?showone=Comments#Comments) to get a better idea of good comments.
 
 ## How to use the project
+There are two ways to use the project. VM or on host machine.
 
-1. Install Vagrant and VirtualBox if you have not done so already. Instructions on how to do so can be found on the websites as well as in the course materials.
+###Use the project in VM
+Install Vagrant VM if you have not done so already. Instructions on how to do so can be found [here](https://www.udacity.com/wiki/ud088/vagrant).
 
-2. Clone the fullstack-nanodegree-vm repository. There is a catalog folder provided for you, but no files have been included. If a catalog folder does not exist, simply create your own inside of the vagrant folder.
+Inside Vagrant VM. Setup the project using git.
+```bash
+git clone https://github.com/linusdong/Udacity_Nanodegree_FullStackWeb.git
+```
 
-3. Launch the Vagrant VM (by typing vagrant up in the directory fullstack/vagrant from the terminal). You can find further instructions on how to do so here.
+####Lazy yet more effective way. Clone the project inside the same folder with Vagrantfile on host machine.
 
-4. Write the Flask application locally in the /vagrant/catalog directory (which will automatically be synced to /vagrant/catalog within the VM). Name it application.py.
+###Use the project on host machine
+Clone the project
+```bash
+git clone https://github.com/linusdong/Udacity_Nanodegree_FullStackWeb.git
+```
 
-5. Run your application within the VM by typing python /vagrant/catalog/application.py into the Terminal. If you named the file from step 4 as something other than application.py, in the above command substitute in the file name on your computer.
+Install essential packages.
+```bash
+sudo su
+apt-get -qqy update
+apt-get -qqy install postgresql python-psycopg2
+apt-get -qqy install python-flask python-sqlalchemy
+apt-get -qqy install python-pip
+pip install oauth2client
+pip install requests
+pip install httplib2
+```
 
-6. Access and test your application by visiting http://localhost:8000 locally on your browser.
-7. [atom api testing](http://localhost:8000/recent.atom)
+
+###Run the app
+Go to project folder, run the app using python, assume directors.db file is present. 
+```bash
+python application.py
+```
+
+If the db file is not there with application.py, setup database and populate dummy data.
+```bash
+python database-setup.py
+python populatedatabase.py
+```
+
+Access and test your application by visiting http://localhost:8000 locally on your browser.
+
+### API/JSON testing
+[atom api testing](http://localhost:8000/recent.atom)
+[get all the director](#)
+[get all the movie from one director](#)
+[get movie by id](#)
+
+##Troubleshoot
+###OAuth2Credentials object is not JSON serializable
+ONLY do this step because you encounter the error. Downgrade python package to prevent errors. The ERROR is [OAuth2Credentials object is not JSON serializable](http://discussions.udacity.com/t/fix-oauth2credentials-object-is-not-json-serializable/15515)
+```bash
+sudo su
+pip install werkzeug==0.8.3
+pip install flask==0.9
+pip install Flask-Login==0.1.3
+```
+
+## Project display example
+### Guest index page
+![display example](./pics/example-index.png)
+### Atom example
+![display atom](./pics/example-atom.png)
+### Authenticated user
+![display user](./pics/example-index-login.png)
 
 ## Project grading guideline
 ![Project grading guideline](./pics/project3rubric.png)
+
