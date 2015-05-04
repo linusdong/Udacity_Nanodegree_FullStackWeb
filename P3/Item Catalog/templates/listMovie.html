@@ -23,7 +23,7 @@ $(document).on('click', '.btn-trailer', function(event) {
 {% endblock %} {% block navbar %} {{ super() }} {% if user %}
 <ul class="nav navbar-nav">
     <li>
-        <a href="{{url_for('editMovie', director_id = movie.director_id, movie_id = movie.id)}}"> Edit Movie</a>
+        <a href="{{url_for('edit_movie', director_id = movie.director_id, movie_id = movie.id)}}"> Edit Movie</a>
     </li>
 </ul>
 {% endif %} {% endblock %} {% block content %}
@@ -59,7 +59,7 @@ $(document).on('click', '.btn-trailer', function(event) {
         <p><b>Name:</b></p>
         <p>{{movie.name}}</p>
         <p><b>Director:</b></p>
-        <p><a href="{{url_for('listDirector', director_id = director.id)}}">{{director.name}}</a></p>
+        <p><a href="{{url_for('list_director', director_id = director.id)}}">{{director.name}}</a></p>
         <p><b>Description:</b></p>
         <p>{{movie.description}}</p>
         <!--trailer button here-->

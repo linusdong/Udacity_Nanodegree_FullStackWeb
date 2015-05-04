@@ -1,6 +1,8 @@
 # Item Catalog: Linus Movie App
 
 ## Change log
+* May 3rd 2015, db_helper implemented and PEP8 compliance
+* May 2nd 2015, CSRF protection on all delete action
 * May 1st 2015, RFT and UPD project based on feedback. JSON error is gone, downgrade is not needed.
 * April 30th 2015, ATOM API for extra credit, secure web application
 * April 29th 2015, UPD styling on login/logout function.
