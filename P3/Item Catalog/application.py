@@ -2,9 +2,7 @@
     Created by Linus Dong April 22nd 2015
 '''
 from flask import Flask, render_template, request, redirect, jsonify, url_for
-from flask import flash
-app = Flask(__name__)
-
+from flask import flash, send_from_directory
 
 from flask import session as login_session
 import random
@@ -25,11 +23,30 @@ from werkzeug.contrib.atom import AtomFeed
 import db_helper
 
 
+app = Flask(__name__)
+# This is the path to the upload directory
+app.config['UPLOAD_FOLDER'] = 'uploads/'
+# These are the extension that we are accepting to be uploaded
+app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
+
+
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Linus Movie App"
 
 
+# This route is expecting a parameter containing the name
+# of a file. Then it will locate that file on the upload
+# directory and show it on the browser, so if the user uploads
+# an image, that image is going to be show after the upload
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    print request.url
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename)
+
+
+# http://flask.pocoo.org/snippets/3/
 def csrf_protect(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -38,7 +55,7 @@ def csrf_protect(f):
             if not token or token != request.form.get('_csrf_token'):
                 response = make_response(json.dumps("Token's doesn't match "
                                                     "given session token."),
-                                         403)
+                                         401)
                 response.headers['Content-Type'] = 'application/json'
                 return response
         return f(*args, **kwargs)

@@ -6,6 +6,10 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Director, Base, Movie, User
 import datetime
 import re
+import os
+from werkzeug import secure_filename
+import random
+import string
 
 
 engine = create_engine('sqlite:///directors.db')
@@ -13,6 +17,24 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+UPLOAD_FOLDER = 'uploads/'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+UPLOAD_URL = '/uploads/'
+
+
+# rename given filename to prevent duplicate name
+def create_unique_name(filename):
+    random_string = ''.join(random.choice(string.ascii_uppercase
+                                          + string.digits) for x in range(8))
+    filename = random_string + '_' + filename
+    return filename
+
+
+# For a given file, return whether it's an allowed type or not
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 # Extract the youtube ID from the url
@@ -68,10 +90,23 @@ def get_director(director_id):
 
 def create_director(login_session, request):
     now = datetime.datetime.now()
+    if request.files['image']:
+        # Get the name of the uploaded file
+        file = request.files['image']
+        # Check if the file is one of the allowed types/extensions
+        if file and allowed_file(file.filename):
+            # Make the filename safe, remove unsupported chars
+            filename = secure_filename(file.filename)
+            # prevent duplicated name
+            new_name = create_unique_name(filename)
+            # Move the file form the temporal folder to
+            # the upload folder we setup
+            file.save(os.path.join(UPLOAD_FOLDER, new_name))
+            url = '{url}{filename}'.format(url=UPLOAD_URL, filename=new_name)
     new_director = Director(create_date=now, last_update=now,
                             user_id=login_session['user_id'],
                             name=request.form['name'],
-                            image=request.form['image'],
+                            image=url,
                             bio=request.form['bio'])
     session.add(new_director)
     session.commit()
@@ -82,8 +117,20 @@ def edit_director(request, director_id):
     edited_director = get_director(director_id)
     if request.form['name']:
         edited_director.name = request.form['name']
-    if request.form['image']:
-        edited_director.image = request.form['image']
+    if request.files['image']:
+        # Get the name of the uploaded file
+        file = request.files['image']
+        # Check if the file is one of the allowed types/extensions
+        if file and allowed_file(file.filename):
+            # Make the filename safe, remove unsupported chars
+            filename = secure_filename(file.filename)
+            # prevent duplicated name
+            new_name = create_unique_name(filename)
+            # Move the file form the temporal folder to
+            # the upload folder we setup
+            file.save(os.path.join(UPLOAD_FOLDER, new_name))
+            url = '{url}{filename}'.format(url=UPLOAD_URL, filename=new_name)
+            edited_director.image = url
     if request.form['bio']:
         edited_director.bio = request.form['bio']
     now = datetime.datetime.now()
@@ -118,10 +165,23 @@ def get_recent_movies():
 def new_movie(director_id, request, login_session):
     trailer_id = get_youtube_id(request.form['trailer'])
     now = datetime.datetime.now()
+    if request.files['image']:
+        # Get the name of the uploaded file
+        file = request.files['image']
+        # Check if the file is one of the allowed types/extensions
+        if file and allowed_file(file.filename):
+            # Make the filename safe, remove unsupported chars
+            filename = secure_filename(file.filename)
+            # prevent duplicated name
+            new_name = create_unique_name(filename)
+            # Move the file form the temporal folder to
+            # the upload folder we setup
+            file.save(os.path.join(UPLOAD_FOLDER, new_name))
+            url = '{url}{filename}'.format(url=UPLOAD_URL, filename=new_name)
     new_movie = Movie(create_date=now, last_update=now,
                       user_id=login_session['user_id'],
                       name=request.form['name'],
-                      image=request.form['image'],
+                      image=url,
                       trailer=trailer_id,
                       description=request.form['description'],
                       director_id=director_id)
@@ -134,8 +194,20 @@ def edit_movie(movie_id, request):
     edited_movie = get_movie(movie_id)
     if request.form['name']:
         edited_movie.name = request.form['name']
-    if request.form['image']:
-        edited_movie.image = request.form['image']
+    if request.files['image']:
+        # Get the name of the uploaded file
+        file = request.files['image']
+        # Check if the file is one of the allowed types/extensions
+        if file and allowed_file(file.filename):
+            # Make the filename safe, remove unsupported chars
+            filename = secure_filename(file.filename)
+            # prevent duplicated name
+            new_name = create_unique_name(filename)
+            # Move the file form the temporal folder to
+            # the upload folder we setup
+            file.save(os.path.join(UPLOAD_FOLDER, new_name))
+            url = '{url}{filename}'.format(url=UPLOAD_URL, filename=new_name)
+        edited_movie.image = url
     if request.form['description']:
         edited_movie.description = request.form['description']
     if request.form['trailer']:

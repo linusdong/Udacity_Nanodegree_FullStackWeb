@@ -1,5 +1,5 @@
 {% extends "layout.html" %} {% block title %}New Movie{% endblock %} {% block content %}
-<form class="form-horizontal" action="{{url_for('new_movie', director_id = director_id)}}" method="post">
+<form class="form-horizontal" enctype="multipart/form-data" action="{{url_for('new_movie', director_id = director_id)}}" method="post">
     <div class="form-group">
         <label for="inputName" class="col-sm-2 control-label">Name</label>
         <div class="col-xs-4">
@@ -7,9 +7,9 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="inputImage" class="col-sm-2 control-label">Image</label>
-        <div class="col-xs-9">
-            <input type="text" class="form-control" name="image" placeholder="Please enter URL for the image.">
+        <label for="exampleInputFile" class="col-sm-2 control-label">Image upload</label>
+        <div class="col-xs-4">
+            <input type="file" id="exampleInputFile" name="image">
         </div>
     </div>
     <div class="form-group">

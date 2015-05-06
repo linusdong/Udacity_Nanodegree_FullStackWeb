@@ -1,6 +1,8 @@
 # Item Catalog: Linus Movie App
 
 ## Change log
+* May 5th 2015, image upload function implemented
+* May 4th 2015, image upload example implemented
 * May 3rd 2015, db_helper implemented and PEP8 compliance
 * May 2nd 2015, CSRF protection on all delete action
 * May 1st 2015, RFT and UPD project based on feedback. JSON error is gone, downgrade is not needed.
