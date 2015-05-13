@@ -60,6 +60,7 @@ class Conference(ndb.Model):
     endDate         = ndb.DateProperty()
     maxAttendees    = ndb.IntegerProperty()
     seatsAvailable  = ndb.IntegerProperty()
+    sessionKeysRelated = ndb.StringProperty(repeated=True)
 
 class ConferenceForm(messages.Message):
     """ConferenceForm -- Conference outbound form message"""
@@ -75,6 +76,7 @@ class ConferenceForm(messages.Message):
     endDate         = messages.StringField(10) #DateTimeField()
     websafeKey      = messages.StringField(11)
     organizerDisplayName = messages.StringField(12)
+    sessionKeysRelated = messages.StringField(13, repeated=True)
 
 class ConferenceForms(messages.Message):
     """ConferenceForms -- multiple Conference outbound form message"""
@@ -108,3 +110,33 @@ class ConferenceQueryForms(messages.Message):
     """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form message"""
     filters = messages.MessageField(ConferenceQueryForm, 1, repeated=True)
 
+class Session(ndb.Model):
+    """Session -- Session object"""
+    name            = ndb.StringProperty(required=True)
+    websafeConferenceKey = ndb.StringProperty()
+    speaker         = ndb.StringProperty()
+    highlights      = ndb.StringProperty(repeated=True)
+    typeOfSession   = ndb.StringProperty()
+    startDate       = ndb.DateProperty()
+    duration        = ndb.IntegerProperty()
+    startTime       = ndb.TimeProperty()
+    organizerUserId = ndb.StringProperty()
+
+
+class SessionForm(messages.Message):
+    """SessionForm -- Session outbound form message"""
+    name            = messages.StringField(1)
+    websafeConferenceKey = messages.StringField(2)
+    speaker         = messages.StringField(3)
+    highlights      = messages.StringField(4, repeated=True)
+    typeOfSession   = messages.StringField(5)
+    startDate       = messages.StringField(6)   # DateTimeField()
+    duration        = messages.IntegerField(7)
+    startTime       = messages.StringField(8)   # TimeField()
+    organizerUserId = messages.StringField(9)
+    websafeKey      = messages.StringField(10)
+
+
+class SessionForms(messages.Message):
+    """SessionForms -- multiple Session outbound form message"""
+    items = messages.MessageField(SessionForm, 1, repeated=True)
