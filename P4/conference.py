@@ -39,6 +39,8 @@ from models import TeeShirtSize
 from models import Session
 from models import SessionForm
 from models import SessionForms
+from models import SessionQueryForm
+from models import SessionQueryForms
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -80,6 +82,9 @@ FIELDS =    {
             'TOPIC': 'topics',
             'MONTH': 'month',
             'MAX_ATTENDEES': 'maxAttendees',
+            'SPEAKER': 'speaker',
+            'DURATION': 'duration',
+            'TYPE': 'type',
             }
 
 CONF_GET_REQUEST = endpoints.ResourceContainer(
@@ -95,6 +100,8 @@ CONF_POST_REQUEST = endpoints.ResourceContainer(
 SESS_GET_REQUEST = endpoints.ResourceContainer(
     message_types.VoidMessage,
     websafeConferenceKey=messages.StringField(1),
+    typeOfSession=messages.StringField(2),
+    speaker=messages.StringField(3),
 )
 
 SESS_POST_REQUEST = endpoints.ResourceContainer(
@@ -300,7 +307,6 @@ class ConferenceApi(remote.Service):
 
         for f in filters:
             filtr = {field.name: getattr(f, field.name) for field in f.all_fields()}
-
             try:
                 filtr["field"] = FIELDS[filtr["field"]]
                 filtr["operator"] = OPERATORS[filtr["operator"]]
@@ -569,6 +575,25 @@ class ConferenceApi(remote.Service):
         )
 
 # - - - Session objects - - - - - - - - - - - - - - - - -
+    def _getSessionQuery(self, request):
+        """Return formatted query from the submitted filters."""
+        s = Session.query()
+        inequality_filter, filters = self._formatFilters(request.filters)
+
+        # If exists, sort on inequality filter first
+        if not inequality_filter:
+            s = s.order(Session.name)
+        else:
+            s = s.order(ndb.GenericProperty(inequality_filter))
+            s = s.order(Session.name)
+
+        for filtr in filters:
+            if filtr["field"] in ["duration"]:
+                filtr["value"] = int(filtr["value"])
+            formatted_query = ndb.query.FilterNode(filtr["field"], filtr["operator"], filtr["value"])
+            s = s.filter(formatted_query)
+        return s
+
     def _copySessionToForm(self, session):
         """Copy relevant fields from Session to SessionForm."""
         sf = SessionForm()
@@ -579,7 +604,7 @@ class ConferenceApi(remote.Service):
                     setattr(sf, field.name, str(getattr(session, field.name)))
                 else:
                     setattr(sf, field.name, getattr(session, field.name))
-            elif field.name == "websafeKey":
+            elif field.name == "websafeSessionKey":
                 setattr(sf, field.name, session.key.urlsafe())
         sf.check_initialized()
         return sf
@@ -609,18 +634,18 @@ class ConferenceApi(remote.Service):
 
         # copy SessionForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name) for field in request.all_fields()}
+        del data['websafeSessionKey']
         # add default values for those missing (both data model & outbound Message)
         for df in SESSION_DEFAULTS:
             if data[df] in (None, []):
                 data[df] = SESSION_DEFAULTS[df]
                 setattr(request, df, SESSION_DEFAULTS[df])
 
-        # convert dates from strings to Date objects; set month based on start_date
-        if data['startDate']:
-            data['startDate'] = datetime.strptime(data['startDate'][:10], "%Y-%m-%d").date()
-        if data['startTime']:
-            data['startTime'] = datetime.strptime(data['startTime'], "%H-%M-%S").date()
-
+        # convert dates from strings to Date objects;
+            if data['startDate']:
+                temp = data['startDate']
+                data['startDate'] = datetime.strptime(temp[:10], "%Y-%m-%d").date()
+                data['startTime'] = datetime.strptime(temp[11:], "%H:%M:%S").time()
         # generate Profile Key based on user ID and Session
         # ID based on Profile key get Session key from ID
         c_key = ndb.Key(urlsafe=wsck)
@@ -631,9 +656,10 @@ class ConferenceApi(remote.Service):
 
         # create Session, return (modified) SessionForm
         Session(**data).put()
-        return request
+        session = s_key.get()
+        return self._copySessionToForm(session)
 
-    @endpoints.method(SessionForm, SessionForm,
+    @endpoints.method(SESS_POST_REQUEST, SessionForm,
             path='conference/{websafeConferenceKey}/session',
             http_method='POST', name='createSession')
     def createSession(self, request):
@@ -642,7 +668,7 @@ class ConferenceApi(remote.Service):
 
     @endpoints.method(SESS_GET_REQUEST, SessionForms,
             path='conference/{websafeConferenceKey}/getConferenceSessions',
-            http_method='POST', name='getConferenceSessions')
+            http_method='GET', name='getConferenceSessions')
     def getConferenceSessions(self, request):
         """Return sessions created by conference."""
         wsck = request.websafeConferenceKey
@@ -654,4 +680,51 @@ class ConferenceApi(remote.Service):
             items=[self._copySessionToForm(session) for session in sess]
         )
 
+    @endpoints.method(SessionQueryForms, SessionForms,
+            path='querySessions',
+            http_method='GET',
+            name='querySessions')
+    def querySessions(self, request):
+        """Query for sessions."""
+        sess = self._getSessionQuery(request)
+
+        # return individual ConferenceForm object per Conference
+        return SessionForms(
+                items=[self._copySessionToForm(session) for session in sess]
+        )
+
+    @endpoints.method(SESS_GET_REQUEST, SessionForms,
+            path='conference/{websafeConferenceKey}/getConferenceSessionsByType/{typeOfSession}',
+            http_method='GET', name='getConferenceSessionsByType')
+    def getConferenceSessionsByType(self, request):
+        """Query for sessions, filter by type and conference"""
+        s = Session.query()
+        # field = "city"
+        # operator = "="
+        # value = "London"
+        # f = ndb.query.FilterNode(field, operator, value)
+        # q = q.filter(f)
+        s = s.filter(Session.websafeConferenceKey==request.websafeConferenceKey)
+        s = s.filter(Session.typeOfSession==request.typeOfSession)
+
+        return SessionForms(
+            items=[self._copySessionToForm(session) for session in s]
+        )
+
+    @endpoints.method(SESS_GET_REQUEST, SessionForms,
+            path='getSessionsBySpeaker/{speaker}',
+            http_method='GET', name='getSessionsBySpeaker')
+    def getSessionsBySpeaker(self, request):
+        """Query for sessions, filter by speaker"""
+        s = Session.query()
+        # field = "city"
+        # operator = "="
+        # value = "London"
+        # f = ndb.query.FilterNode(field, operator, value)
+        # q = q.filter(f)
+        s = s.filter(Session.speaker==request.speaker)
+
+        return SessionForms(
+            items=[self._copySessionToForm(session) for session in s]
+        )
 api = endpoints.api_server([ConferenceApi])# register API
