@@ -46,3 +46,9 @@ example:
 "operator":"GT"
 "value":"2015-05-17 12:35:22"
 ```
+##Task 2: Add Sessions to User Wishlist
+1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.addSessionToWishlist) to addSessionToWishlist(SessionKey)
+2. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.getSessionsInWishlist) to getSessionsInWishlist()
+
+user can only add session in the conference that user have registered to attend
+
