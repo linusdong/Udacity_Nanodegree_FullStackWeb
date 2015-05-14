@@ -27,6 +27,7 @@ class Profile(ndb.Model):
     mainEmail = ndb.StringProperty()
     teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
     conferenceKeysToAttend = ndb.StringProperty(repeated=True)
+    sessionKeysWishlist = ndb.StringProperty(repeated=True)
 
 class ProfileMiniForm(messages.Message):
     """ProfileMiniForm -- update Profile form message"""
@@ -39,6 +40,7 @@ class ProfileForm(messages.Message):
     mainEmail = messages.StringField(2)
     teeShirtSize = messages.EnumField('TeeShirtSize', 3)
     conferenceKeysToAttend = messages.StringField(4, repeated=True)
+    sessionKeysWishlist = messages.StringField(5, repeated=True)
 
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""
@@ -113,28 +115,24 @@ class ConferenceQueryForms(messages.Message):
 class Session(ndb.Model):
     """Session -- Session object"""
     name            = ndb.StringProperty(required=True)
-    websafeConferenceKey = ndb.StringProperty()
     speaker         = ndb.StringProperty()
     highlights      = ndb.StringProperty(repeated=True)
     typeOfSession   = ndb.StringProperty()
-    startDate       = ndb.DateProperty()
+    startDateTime   = ndb.DateTimeProperty()
     duration        = ndb.IntegerProperty()
-    startTime       = ndb.TimeProperty()
     organizerUserId = ndb.StringProperty()
 
 
 class SessionForm(messages.Message):
     """SessionForm -- Session outbound form message"""
     name            = messages.StringField(1)
-    websafeConferenceKey = messages.StringField(2)
-    speaker         = messages.StringField(3)
-    highlights      = messages.StringField(4, repeated=True)
-    typeOfSession   = messages.StringField(5)
-    startDate       = messages.StringField(6)   # DateTimeField()
-    duration        = messages.IntegerField(7)
-    startTime       = messages.StringField(8)   # TimeField()
-    organizerUserId = messages.StringField(9)
-    websafeSessionKey = messages.StringField(10)
+    speaker         = messages.StringField(2)
+    highlights      = messages.StringField(3, repeated=True)
+    typeOfSession   = messages.StringField(4)
+    startDateTime   = messages.StringField(5)   # DateTimeField()
+    duration        = messages.IntegerField(6)
+    organizerUserId = messages.StringField(7)
+    websafeSessionKey = messages.StringField(8)
 
 
 class SessionForms(messages.Message):

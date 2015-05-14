@@ -85,7 +85,7 @@ FIELDS =    {
             'SPEAKER': 'speaker',
             'DURATION': 'duration',
             'TYPE': 'type',
-            }
+            'STARTDATETIME': 'startDateTime'}
 
 CONF_GET_REQUEST = endpoints.ResourceContainer(
     message_types.VoidMessage,
@@ -102,6 +102,7 @@ SESS_GET_REQUEST = endpoints.ResourceContainer(
     websafeConferenceKey=messages.StringField(1),
     typeOfSession=messages.StringField(2),
     speaker=messages.StringField(3),
+    sessionKey=messages.StringField(4),
 )
 
 SESS_POST_REQUEST = endpoints.ResourceContainer(
@@ -575,6 +576,49 @@ class ConferenceApi(remote.Service):
         )
 
 # - - - Session objects - - - - - - - - - - - - - - - - -
+
+    def _sessionRegistration(self, request, reg=True):
+        """Add or remove session from wishlist for selected user."""
+        retval = None
+        prof = self._getProfileFromUser() # get user Profile
+        # check if session exists given sessionKey
+        # get session; check that it exists
+        wssk = request.sessionKey
+        c_key = ndb.Key(urlsafe=wssk).parent()
+        websafe_conference_key = c_key.urlsafe()
+        if not c_key:
+            raise endpoints.NotFoundException(
+                'No session found with key: %s' % wssk)
+
+        # register
+        if reg:
+            # check if user already registered otherwise add
+            if wssk in prof.sessionKeysWishlist:
+                raise ConflictException(
+                    "The session have already in your wishlist.")
+            # check if user in the conference otherwise add
+            if websafe_conference_key not in prof.conferenceKeysToAttend:
+                raise ConflictException(
+                    "You are not register the conference.")
+            # register user, take away one seat
+            prof.sessionKeysWishlist.append(request.sessionKey)
+            retval = True
+
+        # unregister
+        else:
+            # check if user already registered
+            if wssk in prof.sessionKeysWishlist:
+
+                # unregister user, add back one seat
+                prof.sessionKeysWishlist.remove(wssk)
+                retval = True
+            else:
+                retval = False
+
+        # write things back to the datastore & return
+        prof.put()
+        return BooleanMessage(data=retval)
+
     def _getSessionQuery(self, request):
         """Return formatted query from the submitted filters."""
         s = Session.query()
@@ -590,6 +634,8 @@ class ConferenceApi(remote.Service):
         for filtr in filters:
             if filtr["field"] in ["duration"]:
                 filtr["value"] = int(filtr["value"])
+            if filtr["field"] in ["startDateTime"]:
+                filtr["value"] = datetime.strptime(filtr["value"], "%Y-%m-%d %H:%M:%S")
             formatted_query = ndb.query.FilterNode(filtr["field"], filtr["operator"], filtr["value"])
             s = s.filter(formatted_query)
         return s
@@ -635,17 +681,20 @@ class ConferenceApi(remote.Service):
         # copy SessionForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name) for field in request.all_fields()}
         del data['websafeSessionKey']
+        del data['websafeConferenceKey']
         # add default values for those missing (both data model & outbound Message)
         for df in SESSION_DEFAULTS:
             if data[df] in (None, []):
                 data[df] = SESSION_DEFAULTS[df]
                 setattr(request, df, SESSION_DEFAULTS[df])
 
-        # convert dates from strings to Date objects;
-            if data['startDate']:
-                temp = data['startDate']
-                data['startDate'] = datetime.strptime(temp[:10], "%Y-%m-%d").date()
-                data['startTime'] = datetime.strptime(temp[11:], "%H:%M:%S").time()
+        # convert dates from strings to Date or time objects;
+            if data['startDateTime']:
+                temp = str(data['startDateTime'])
+                data['startDateTime'] = datetime.strptime(temp, "%Y-%m-%d %H:%M:%S")
+            else:
+                # TODO debug code for query testing
+                data['startDateTime'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # generate Profile Key based on user ID and Session
         # ID based on Profile key get Session key from ID
         c_key = ndb.Key(urlsafe=wsck)
@@ -673,7 +722,7 @@ class ConferenceApi(remote.Service):
         """Return sessions created by conference."""
         wsck = request.websafeConferenceKey
         c_key = ndb.Key(urlsafe=wsck)
-        # create ancestor query for all key matches for this user
+        # create ancestor query for all key matches for this conference
         sess = Session.query(ancestor=c_key)
         # return set of SessionForm objects per Conference
         return SessionForms(
@@ -682,12 +731,11 @@ class ConferenceApi(remote.Service):
 
     @endpoints.method(SessionQueryForms, SessionForms,
             path='querySessions',
-            http_method='GET',
+            http_method='POST',
             name='querySessions')
     def querySessions(self, request):
-        """Query for sessions."""
+        """Query for sessions. Dubugging only"""
         sess = self._getSessionQuery(request)
-
         # return individual ConferenceForm object per Conference
         return SessionForms(
                 items=[self._copySessionToForm(session) for session in sess]
@@ -698,13 +746,9 @@ class ConferenceApi(remote.Service):
             http_method='GET', name='getConferenceSessionsByType')
     def getConferenceSessionsByType(self, request):
         """Query for sessions, filter by type and conference"""
-        s = Session.query()
-        # field = "city"
-        # operator = "="
-        # value = "London"
-        # f = ndb.query.FilterNode(field, operator, value)
-        # q = q.filter(f)
-        s = s.filter(Session.websafeConferenceKey==request.websafeConferenceKey)
+        wsck = request.websafeConferenceKey
+        c_key = ndb.Key(urlsafe=wsck)
+        s = Session.query(ancestor=c_key)
         s = s.filter(Session.typeOfSession==request.typeOfSession)
 
         return SessionForms(
@@ -717,14 +761,35 @@ class ConferenceApi(remote.Service):
     def getSessionsBySpeaker(self, request):
         """Query for sessions, filter by speaker"""
         s = Session.query()
-        # field = "city"
-        # operator = "="
-        # value = "London"
-        # f = ndb.query.FilterNode(field, operator, value)
-        # q = q.filter(f)
         s = s.filter(Session.speaker==request.speaker)
 
         return SessionForms(
             items=[self._copySessionToForm(session) for session in s]
         )
+
+    @endpoints.method(SESS_GET_REQUEST, BooleanMessage,
+            path='addSessionToWishlist/{SessionKey}',
+            http_method='POST', name='addSessionToWishlist')
+    def addSessionToWishlist(self, request):
+        """Adds the session to the user's list of sessions"""
+        return self._sessionRegistration(request)
+
+    @endpoints.method(SESS_GET_REQUEST, BooleanMessage,
+            path='addSessionToWishlist/{sessionKey}',
+            http_method='POST', name='addSessionToWishlist')
+    def addSessionToWishlist(self, request):
+        """Adds the session to the user's list of sessions"""
+        return self._sessionRegistration(request)
+
+    @endpoints.method(message_types.VoidMessage, SessionForms,
+            path='conferences/wishlist',
+            http_method='GET', name='getSessionsInWishlist')
+    def getSessionsInWishlist(self, request):
+        """Get list of conferences that user has registered for."""
+        prof = self._getProfileFromUser()
+        sess_keys = [ndb.Key(urlsafe=wssk) for wssk in prof.sessionKeysWishlist]
+        sess = ndb.get_multi(sess_keys)
+        # return set of SessionForm objects per user
+        return SessionForms(items=[self._copySessionToForm(session)for session in sess])
+
 api = endpoints.api_server([ConferenceApi])# register API

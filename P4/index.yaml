@@ -99,3 +99,13 @@ indexes:
   properties:
   - name: speaker
   - name: name
+
+- kind: Session
+  properties:
+  - name: startDateTime
+  - name: name
+
+- kind: Session
+  properties:
+  - name: startTime
+  - name: name
