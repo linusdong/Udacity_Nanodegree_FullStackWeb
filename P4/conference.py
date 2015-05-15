@@ -54,6 +54,8 @@ API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 MEMCACHE_ANNOUNCEMENTS_KEY = "RECENT_ANNOUNCEMENTS"
 ANNOUNCEMENT_TPL = ('Last chance to attend! The following conferences '
                     'are nearly sold out: %s')
+MEMCACHE_SPEAKER_KEY = "FEATURED_SPEAKER"
+SPEAKER_TPL = ('will host the following sessions: %s')
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 DEFAULTS = {
@@ -456,13 +458,47 @@ class ConferenceApi(remote.Service):
 
         return announcement
 
-
     @endpoints.method(message_types.VoidMessage, StringMessage,
             path='conference/announcement/get',
             http_method='GET', name='getAnnouncement')
     def getAnnouncement(self, request):
         """Return Announcement from memcache."""
         return StringMessage(data=memcache.get(MEMCACHE_ANNOUNCEMENTS_KEY) or "")
+
+    @staticmethod
+    def _cacheSpeakerAnnouncement(sessionKey, speaker):
+        """Create Announcement & assign to memcache; used by
+        memcache cron job & putAnnouncement().
+        """
+        c_key = ndb.Key(urlsafe=sessionKey).parent()
+        if c_key is None:
+            announcement = "Error"
+            memcache.set(MEMCACHE_SPEAKER_KEY, announcement)
+            return announcement
+        s = Session.query(ancestor=c_key)
+        s = s.filter(Session.speaker == speaker
+                     ).fetch(projection=[Session.name])
+        if len(s) > 1:
+            # If there is more than one session by this speaker at this conference, 
+            # also add a new Memcache entry that features the speaker and session names.
+            speaker_name = "Our Featured speaker {0} ".format(speaker)
+            announcement = speaker_name + SPEAKER_TPL % (
+                ', '.join(session.name for session in s))
+            memcache.set(MEMCACHE_SPEAKER_KEY, announcement)
+        else:
+            # If there are no sold out conferences,
+            # delete the memcache announcements entry
+            announcement = ""
+            memcache.delete(MEMCACHE_SPEAKER_KEY)
+
+        return announcement
+
+    @endpoints.method(message_types.VoidMessage, StringMessage,
+            path='getFeaturedSpeaker',
+            http_method='GET', name='getFeaturedSpeaker')
+    def getFeaturedSpeaker(self, request):
+        """Return Announcement from memcache."""
+        return StringMessage(data=memcache.get(MEMCACHE_SPEAKER_KEY) or "")
 
 
 # - - - Registration - - - - - - - - - - - - - - - - - - - -
@@ -514,7 +550,6 @@ class ConferenceApi(remote.Service):
         prof.put()
         conf.put()
         return BooleanMessage(data=retval)
-
 
     @endpoints.method(message_types.VoidMessage, ConferenceForms,
             path='conferences/attending',
@@ -600,7 +635,7 @@ class ConferenceApi(remote.Service):
             if websafe_conference_key not in prof.conferenceKeysToAttend:
                 raise ConflictException(
                     "You are not register the conference.")
-            # register user, take away one seat
+            # add session to wish list
             prof.sessionKeysWishlist.append(request.sessionKey)
             retval = True
 
@@ -619,25 +654,35 @@ class ConferenceApi(remote.Service):
         prof.put()
         return BooleanMessage(data=retval)
 
-    def _getSessionQuery(self, request):
+    def _getSessionQuery(self, request, conferenceKey=False):
         """Return formatted query from the submitted filters."""
-        s = Session.query()
-        inequality_filter, filters = self._formatFilters(request.filters)
-
-        # If exists, sort on inequality filter first
-        if not inequality_filter:
-            s = s.order(Session.name)
+        if conferenceKey:
+            wsck = request.websafeConferenceKey
+            c_key = ndb.Key(urlsafe=wsck)
+            # create ancestor query for all key matches for this conference
+            s = Session.query(ancestor=c_key)
         else:
-            s = s.order(ndb.GenericProperty(inequality_filter))
-            s = s.order(Session.name)
+            s = Session.query()
+        try:
+            inequality_filter, filters = self._formatFilters(request.filters)
 
-        for filtr in filters:
-            if filtr["field"] in ["duration"]:
-                filtr["value"] = int(filtr["value"])
-            if filtr["field"] in ["startDateTime"]:
-                filtr["value"] = datetime.strptime(filtr["value"], "%Y-%m-%d %H:%M:%S")
-            formatted_query = ndb.query.FilterNode(filtr["field"], filtr["operator"], filtr["value"])
-            s = s.filter(formatted_query)
+            # If exists, sort on inequality filter first
+            if not inequality_filter:
+                s = s.order(Session.name)
+            else:
+                s = s.order(ndb.GenericProperty(inequality_filter))
+                s = s.order(Session.name)
+
+            for filtr in filters:
+                if filtr["field"] in ["duration"]:
+                    filtr["value"] = int(filtr["value"])
+                if filtr["field"] in ["startDateTime"]:
+                    filtr["value"] = datetime.strptime(filtr["value"], "%Y-%m-%d %H:%M:%S")
+                formatted_query = ndb.query.FilterNode(filtr["field"], filtr["operator"], filtr["value"])
+                s = s.filter(formatted_query)
+        except AttributeError:
+            # filter is missing, return s without filter
+            return s
         return s
 
     def _copySessionToForm(self, session):
@@ -694,7 +739,7 @@ class ConferenceApi(remote.Service):
                 data['startDateTime'] = datetime.strptime(temp, "%Y-%m-%d %H:%M:%S")
             else:
                 # TODO debug code for query testing
-                data['startDateTime'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                data['startDateTime'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         # generate Profile Key based on user ID and Session
         # ID based on Profile key get Session key from ID
         c_key = ndb.Key(urlsafe=wsck)
@@ -706,8 +751,23 @@ class ConferenceApi(remote.Service):
         # create Session, return (modified) SessionForm
         Session(**data).put()
         session = s_key.get()
+        wssk = s_key.urlsafe()
+        taskqueue.add(params={'sessionKey': wssk,
+            'speaker': session.speaker},
+            url='/tasks/set_speaker_announcement'
+        )
         return self._copySessionToForm(session)
 
+    def _queryConferenceSessionQueryByDuration(self, request, long_dur=True):
+        """Return sessions by conference_key sort by duration"""
+        s = self._getSessionQuery(request, conferenceKey=True)
+        if long_dur:
+            s = s.order(-Session.duration)
+        else:
+            s = s.order(Session.duration)
+        return s
+
+# - - - Session end point method - - - - - - - - - - - - - - - - -
     @endpoints.method(SESS_POST_REQUEST, SessionForm,
             path='conference/{websafeConferenceKey}/session',
             http_method='POST', name='createSession')
@@ -720,10 +780,7 @@ class ConferenceApi(remote.Service):
             http_method='GET', name='getConferenceSessions')
     def getConferenceSessions(self, request):
         """Return sessions created by conference."""
-        wsck = request.websafeConferenceKey
-        c_key = ndb.Key(urlsafe=wsck)
-        # create ancestor query for all key matches for this conference
-        sess = Session.query(ancestor=c_key)
+        sess = self._getSessionQuery(request, conferenceKey=True)
         # return set of SessionForm objects per Conference
         return SessionForms(
             items=[self._copySessionToForm(session) for session in sess]
@@ -734,11 +791,16 @@ class ConferenceApi(remote.Service):
             http_method='POST',
             name='querySessions')
     def querySessions(self, request):
-        """Query for sessions. Dubugging only"""
-        sess = self._getSessionQuery(request)
+        """Query for sessions in all conference"""
+        sess = Session.query()
+        sess = sess.filter(Session.typeOfSession != "workshop")
+        temp = []
+        for session in sess:
+            if session.startDateTime.hour < 19:
+                temp.append(session)
         # return individual ConferenceForm object per Conference
         return SessionForms(
-                items=[self._copySessionToForm(session) for session in sess]
+                items=[self._copySessionToForm(session) for session in temp]
         )
 
     @endpoints.method(SESS_GET_REQUEST, SessionForms,
@@ -746,9 +808,7 @@ class ConferenceApi(remote.Service):
             http_method='GET', name='getConferenceSessionsByType')
     def getConferenceSessionsByType(self, request):
         """Query for sessions, filter by type and conference"""
-        wsck = request.websafeConferenceKey
-        c_key = ndb.Key(urlsafe=wsck)
-        s = Session.query(ancestor=c_key)
+        s = self._getSessionQuery(request, conferenceKey=True)
         s = s.filter(Session.typeOfSession==request.typeOfSession)
 
         return SessionForms(
@@ -768,13 +828,6 @@ class ConferenceApi(remote.Service):
         )
 
     @endpoints.method(SESS_GET_REQUEST, BooleanMessage,
-            path='addSessionToWishlist/{SessionKey}',
-            http_method='POST', name='addSessionToWishlist')
-    def addSessionToWishlist(self, request):
-        """Adds the session to the user's list of sessions"""
-        return self._sessionRegistration(request)
-
-    @endpoints.method(SESS_GET_REQUEST, BooleanMessage,
             path='addSessionToWishlist/{sessionKey}',
             http_method='POST', name='addSessionToWishlist')
     def addSessionToWishlist(self, request):
@@ -791,5 +844,29 @@ class ConferenceApi(remote.Service):
         sess = ndb.get_multi(sess_keys)
         # return set of SessionForm objects per user
         return SessionForms(items=[self._copySessionToForm(session)for session in sess])
+
+    @endpoints.method(SESS_GET_REQUEST, SessionForms,
+            path='conference/{websafeConferenceKey}/querySessionsByLongDuration',
+            http_method='GET',
+            name='queryConferenceSessionsByLongDuration')
+    def queryConferenceSessionsByLongDuration(self, request):
+        """Query for sessions in one conference, then sort by long duration"""
+        sess = self._queryConferenceSessionQueryByDuration(request)
+        # return individual ConferenceForm object per Conference
+        return SessionForms(
+                items=[self._copySessionToForm(session) for session in sess]
+        )
+
+    @endpoints.method(SESS_GET_REQUEST, SessionForms,
+            path='conference/{websafeConferenceKey}/querySessionsByShortDuration',
+            http_method='GET',
+            name='queryConferenceSessionsByShortDuration')
+    def queryConferenceSessionsByShortDuration(self, request):
+        """Query for sessions in one conference, then sort by short duration"""
+        sess = self._queryConferenceSessionQueryByDuration(request, long_dur=False)
+        # return individual ConferenceForm object per Conference
+        return SessionForms(
+                items=[self._copySessionToForm(session) for session in sess]
+        )
 
 api = endpoints.api_server([ConferenceApi])# register API
