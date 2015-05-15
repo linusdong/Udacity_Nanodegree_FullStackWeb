@@ -37,11 +37,28 @@ sudo apt-get upgrade -y
 # change ssh port from 22 to 2200
 nano /etc/ssh/sshd_config
 Port 2200
+# reboot machine
+reboot
+# login using 2200 port via ssh
+ssh -i .ssh/udacity_key.rsa root@54.191.139.237 -p2200
+# use netstat to check the change
+netstat
 # update ufw policy
 # https://help.ubuntu.com/community/UFW
 ufw allow ntp
 ufw allow http
 ufw allow ssh
+ufw allow 2200/udp
+ufw allow 2200/tcp
 # configure to UTC time
 timedatectl set-timezone Europe/London
+# install apache2, mod_wsgi and PostgreSQL
+apt-get install -y libapache2-mod-wsgi apache2 postgresql
+# configure database 
+# http://www.postgresql.org/docs/9.4/static/auth-pg-hba-conf.html
+# read the Note block after the definition for "host" field 
+keep the file as is.
+# configure mod_wsgi and python web applicaiton
+# http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/
+
 ```
