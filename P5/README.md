@@ -4,7 +4,6 @@ The IP for my VM is
 ```bash
 54.191.139.237
 ```
-
 ## Step by step process
 1. Launch your Virtual Machine with your Udacity account
 1. Follow the instructions provided to SSH into your server
@@ -58,7 +57,10 @@ apt-get install -y libapache2-mod-wsgi apache2 postgresql
 # http://www.postgresql.org/docs/9.4/static/auth-pg-hba-conf.html
 # read the Note block after the definition for "host" field 
 keep the file as is.
+su postgres -c 'createuser -dRS vagrant'
+su vagrant -c 'createdb'
+su vagrant -c 'createdb forum'
+su vagrant -c 'psql forum -f /vagrant/forum/forum.sql'
 # configure mod_wsgi and python web applicaiton
 # http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/
-
 ```
