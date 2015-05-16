@@ -20,47 +20,53 @@ The IP for my VM is
 1. Install git, clone and setup your Catalog App project (from your GitHub repository from earlier in the Nanodegree program) so that it functions correctly when visiting your server’s IP address in a browser. Remember to set this up appropriately so that your .git directory is not publicly accessible via a browser!
 
 ## Step by step guide
-
+* setup user and SSH
 ```bash
-# inside vm
-sudo su
-useradd grader
-visudo
-# look for root user, then add the following line after root
-grader  ALL=(ALL:ALL) ALL
-# Ctrl + x to exit
-# press y to save the change
+# inside vm as root
+adduser grader
+# password and username is the same
+usermod -a -G admin grader
 # update and upgrade the installed packages
 sudo apt-get update
 sudo apt-get upgrade -y
 # change ssh port from 22 to 2200
 nano /etc/ssh/sshd_config
 Port 2200
+PermitRootLogin no
+AllowUsers catalog grader
 # reboot machine
 reboot
 # login using 2200 port via ssh
-ssh -i .ssh/udacity_key.rsa root@54.191.139.237 -p2200
+ssh -i .ssh/udacity_key.rsa grader@52.25.92.241 -p2200
 # use netstat to check the change
 netstat
 # update ufw policy
 # https://help.ubuntu.com/community/UFW
 ufw allow ntp
 ufw allow http
-ufw allow ssh
-ufw allow 2200/udp
-ufw allow 2200/tcp
+ufw allow 2200
 # configure to UTC time
 timedatectl set-timezone Europe/London
-# install apache2, mod_wsgi and PostgreSQL
+```
+* Setup database and migration
+```bash
+# install apache2, mod_wsgi and PostgreSQL and dependencies
+sudo su
 apt-get install -y libapache2-mod-wsgi apache2 postgresql
+apt-get -qqy install postgresql python-psycopg2
+apt-get -qqy install python-flask python-sqlalchemy
+apt-get -qqy install python-pip
+pip install bleach
+pip install oauth2client
+pip install requests
+pip install httplib2
 # configure database 
 # http://www.postgresql.org/docs/9.4/static/auth-pg-hba-conf.html
 # read the Note block after the definition for "host" field 
 keep the file as is.
-su postgres -c 'createuser -dRS vagrant'
-su vagrant -c 'createdb'
-su vagrant -c 'createdb forum'
-su vagrant -c 'psql forum -f /vagrant/forum/forum.sql'
+sudo su postgres -c 'createuser -dRS catalog'
+su catalog -c 'createdb'
+
 # configure mod_wsgi and python web applicaiton
 # http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/
 ```
