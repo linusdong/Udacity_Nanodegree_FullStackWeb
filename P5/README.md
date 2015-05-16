@@ -62,11 +62,11 @@ pip install requests
 pip install httplib2
 # configure database 
 # http://www.postgresql.org/docs/9.4/static/auth-pg-hba-conf.html
-# read the Note block after the definition for "host" field 
-keep the file as is.
-sudo su postgres -c 'createuser -dRS catalog'
-su catalog -c 'createdb'
-
+# read the Note block after the definition for "host" field, keep the file as is.
+sudo su postgres -c 'createdb catalog'
+sudo su postgres -c 'psql catalog'
+# inside sql env
+create user catalog PASSWORD 'udacity';
 # configure mod_wsgi and python web applicaiton
 # http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/
 ```
