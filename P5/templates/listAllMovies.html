@@ -1,0 +1,22 @@
+<html>
+
+<body>
+    <h1>The list of Linus' favourite movies</h1>
+    <!--MESSAGE FLASHING EXAMPLE -->
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li><strong>{{message}}</strong></li>
+        {% endfor %}
+    </ul>
+    {% endif %} {% endwith %} {% if movies %} {% for m in movies %}
+    <div>
+        <a href='{{url_for(' listMovie ', director_id = m.director_id, movie_id = m.id)}}'>
+            <img alt="{{m.name}}" src="{{m.image}}" width="140" height="209">
+        </a>
+        <a href='{{url_for(' listMovie ', director_id = m.director_id, movie_id = m.id)}}'>{{m.name}}</a>
+    </div>
+    {% endfor %} {% endif %}
+</body>
+
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+
+<head>
+    {% block head %}
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <title>{% block title %}{% endblock %} - Linus Webpage</title>
+    <script type="text/javascript" charset="utf-8">
+    // Animate in the movies when the page loads
+    $(document).ready(function() {
+        $('.movie-tile').hide().first().show("fast", function showNext() {
+            $(this).next("div").show("fast", showNext);
+        });
+    });
+    </script>
+    {% endblock %}
+</head>
+
+<body>
+    <div id="content">
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="{{url_for('list_all_directors')}}">Linus' favourite directors</a>
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    {% block navbar %} {% endblock %}
+                    <ul class="nav navbar-nav navbar-right"> {% if 'user_id' not in session %}
+                        <li><a href="{{url_for('show_login')}}">Sign in</a></li>
+                        {% else %}
+                        <li><a href="{{url_for('disconnect')}}">Sign out</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% block content %} {% endblock %}
+    </div>
+    <div id="footer">
+        {% block footer %}
+        <p class="center">Created in 2015 by <a href="http://www.linkedin.com/in/jianxidong">Linus Dong</a>.</p>
+        {% endblock %}
+    </div>
+</body>
+
+</html>
