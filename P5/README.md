@@ -20,7 +20,7 @@ http://52.25.92.241/
 1. Install git, clone and setup your Catalog App project (from your GitHub repository from earlier in the Nanodegree program) so that it functions correctly when visiting your server’s IP address in a browser. Remember to set this up appropriately so that your .git directory is not publicly accessible via a browser!
 
 ## Step by step guide
-* setup user and SSH
+* setup user
 ```bash
 # inside vm as root
 adduser grader
@@ -29,17 +29,27 @@ usermod -a -G admin grader
 # update and upgrade the installed packages
 sudo apt-get update
 sudo apt-get upgrade -y
-# change ssh port from 22 to 2200
-nano /etc/ssh/sshd_config
+```
+* setup ssh
+```bash
+sudo nano /etc/ssh/sshd_config
+# Alter default port 22 to 2200
 Port 2200
+# Disable root login
 PermitRootLogin no
-AllowUsers catalog grader
+# Disable Password Authentication for SSH
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+UsePAM no
 # reboot machine
 reboot
 # login using 2200 port via ssh
 ssh -i .ssh/udacity_key.rsa grader@52.25.92.241 -p2200
 # use netstat to check the change
 netstat
+```
+* setup ufw
+```bash
 # update ufw policy
 # https://help.ubuntu.com/community/UFW
 ufw allow ntp
@@ -110,7 +120,9 @@ sudo service apache2 reload
 # http://www.rackaid.com/blog/how-to-block-ssh-brute-force-attacks/
 /sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --set
 /sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent  --update --seconds 60 --hitcount 4 -j DROP
-# manage auto update
+```
+* manage auto update
+```bash
 sudo cat << EOT > /etc/cron.weekly/autoaupdt
 #!/bin/bash
 apt-get update
