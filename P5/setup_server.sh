@@ -128,8 +128,11 @@ sudo service apache2 reload
 
 
 # http://www.rackaid.com/blog/how-to-block-ssh-brute-force-attacks/
-/sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --set
-/sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent  --update --seconds 60 --hitcount 4 -j DROP
+# since you have enable ufw, all other non-local packets are dropped
+# user setting is in /lib/ufw/user.rules
+# customized iptables settings are not needed.
+# /sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --set
+# /sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
 
 # manage auto update
 sudo cat << EOT > /etc/cron.weekly/autoaupdt
@@ -138,6 +141,8 @@ apt-get update
 apt-get upgrade -y
 apt-get autoclean
 EOT
+#enable script
+sudo chmod +x /etc/cron.weekly/autoaupdt
 
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-monit
 # https://mmonit.com/wiki/Monit/MonitorApacheStatus
@@ -170,7 +175,7 @@ set alert webadmin@foo.bar
     if totalmem > 200.0 MB for 5 cycles then restart
     if children > 250 then restart
     if loadavg(5min) greater than 10 for 8 cycles then stop
-    if failed host www.example.co.uk port 80
+    if failed host 52.25.92.241 port 80
           protocol apache-status  dnslimit > 25% or 
                                   loglimit > 80% or 
                                   waitlimit < 20%
