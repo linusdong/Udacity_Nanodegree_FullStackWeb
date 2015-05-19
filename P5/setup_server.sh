@@ -2,7 +2,7 @@
 # assume current user is root
 # create catalog user
 externalIP='52.25.92.241'
-
+email='linusdong@gmail.com'
 userName="catalog"
 result=$(grep $userName /etc/passwd)
 if [[ -z $result ]]; then
@@ -98,7 +98,10 @@ sudo chown -R $USER:$USER /var/www/catalog/
 # make sure there is no permission error
 sudo chmod -R 755 /var/www
 # conf file for wsgi
-sudo cat << EOT > /etc/apache2/sites-available/item_catalog.conf
+# back root account
+exit
+
+cat << EOT > /etc/apache2/sites-available/item_catalog.conf
 <VirtualHost *:80>
     ServerName 52.25.92.241
 
@@ -113,29 +116,31 @@ sudo cat << EOT > /etc/apache2/sites-available/item_catalog.conf
         Order deny,allow
         Allow from all
     </Directory>
-    <Location /server-status>
-         SetHandler server-status
-         Order deny,allow
-         Deny from all
-         Allow from 127.0.0.1
-    </Location>
 </VirtualHost>
 EOT
+# alter mod_status
+a2enmod status
+cat << EOT > /etc/apache2/mods-available/status.conf
+    <Location /server-status>
+            SetHandler server-status
+            Order Deny,Allow
+            Deny from all
+            Allow from localhost
+    </Location>
+EOT
 # enable item_catalog application
-sudo a2ensite item_catalog.conf
+a2ensite item_catalog.conf
 # reload server to apply the change
-sudo service apache2 reload
+service apache2 reload
 
 
 # http://www.rackaid.com/blog/how-to-block-ssh-brute-force-attacks/
-# since you have enable ufw, all other non-local packets are dropped
-# user setting is in /lib/ufw/user.rules
-# customized iptables settings are not needed.
 # /sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --set
-# /sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
+# /sbin/iptables -I INPUT -p tcp --dport 22 -i eth0 -m state --state NEW -m recent  --update --seconds 60 --hitcount 4 -j DROP
+
 
 # manage auto update
-sudo cat << EOT > /etc/cron.weekly/autoaupdt
+cat << EOT > /etc/cron.weekly/autoaupdt
 #!/bin/bash
 apt-get update
 apt-get upgrade -y
@@ -146,11 +151,14 @@ sudo chmod +x /etc/cron.weekly/autoaupdt
 
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-monit
 # https://mmonit.com/wiki/Monit/MonitorApacheStatus
-sudo apt-get install -y monit
+apt-get install -y monit sendmail
 # configure monit
-sudo cat << EOT >> /etc/monit/monitrc
+cat << EOT >> /etc/monit/monitrc
 # update email alert
-set alert webadmin@foo.bar
+  set alert $email
+# setup mail server
+  set mailserver localhost                   # fallback relay
+                 
 # uncomment or update servieces
 # setup http deamon
   set httpd port 2812
@@ -158,7 +166,7 @@ set alert webadmin@foo.bar
     allow 0.0.0.0/0.0.0.0        # allow localhost to connect to the server and
     allow admin:monit      # require user 'admin' with password 'monit'
 # set basic system monitor
-  check system myhost.mydomain.tld
+  check system localhost
     if loadavg (1min) > 4 then alert
     if loadavg (5min) > 2 then alert
     if memory usage > 75% then alert
@@ -175,7 +183,7 @@ set alert webadmin@foo.bar
     if totalmem > 200.0 MB for 5 cycles then restart
     if children > 250 then restart
     if loadavg(5min) greater than 10 for 8 cycles then stop
-    if failed host 52.25.92.241 port 80
+    if failed host localhost port 80
           protocol apache-status  dnslimit > 25% or 
                                   loglimit > 80% or 
                                   waitlimit < 20%
@@ -183,13 +191,6 @@ set alert webadmin@foo.bar
     group server
 EOT
 # check control file syntax and start monit
-sudo su
 monit -t
 monit reload
 monit start all
-
-
-
-
-
-
