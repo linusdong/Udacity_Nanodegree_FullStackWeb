@@ -30,8 +30,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
-CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = "643817254209-ht4pqv4r2gm9k0hvbttgj40550fju4p5.apps.googleusercontent.com"
 APPLICATION_NAME = "Linus Movie App"
 
 

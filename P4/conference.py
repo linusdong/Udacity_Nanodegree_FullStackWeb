@@ -611,7 +611,7 @@ class ConferenceApi(remote.Service):
         )
 
 # - - - Session objects - - - - - - - - - - - - - - - - -
-
+    @ndb.transactional()
     def _sessionRegistration(self, request, reg=True):
         """Add or remove session from wishlist for selected user."""
         retval = None
@@ -746,7 +746,6 @@ class ConferenceApi(remote.Service):
         s_id = Session.allocate_ids(size=1, parent=c_key)[0]
         s_key = ndb.Key(Session, s_id, parent=c_key)
         data['key'] = s_key
-        data['organizerUserId'] = user_id
 
         # create Session, return (modified) SessionForm
         Session(**data).put()

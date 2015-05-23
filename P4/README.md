@@ -21,20 +21,23 @@ The session is a kind in datastore. It has the following properties:
     typeOfSession   = ndb.StringProperty()
     startDateTime   = ndb.DateTimeProperty()
     duration        = ndb.IntegerProperty()
-    organizerUserId = ndb.StringProperty()
+
+###Model Explaination
+
+When a session entity is created, a parent is set to conference entity. Same as conference entity is link to user profile entity. The ancestor path for session entity can help us to find root user or parent conference that related to session.
 
 DateTimeProperty gives more accuracy in term of quering session entities filter by date or time argument.
 
 Speaker is a string property only. Further enhancement needed. Speaker entity could derive from user entity with extra field like a list with name "host sessions" to indicate this user is the speaker of some sessions. Then a queue task can be set up to send confirmation email to the speaker when session is created.
 
-standard endpoints as follow:
+###standard endpoints as follow:
 
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.getConferenceSessions) to getConferenceSessions(websafeConferenceKey)
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.getConferenceSessionsByType) to getConferenceSessionsByType(websafeConferenceKey, typeOfSession)
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.getSessionsBySpeaker) to getSessionsBySpeaker(speaker) 
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.createSession) to createSession(SessionForm, websafeConferenceKey)
 
-extra endpoints as follow:
+###extra endpoints as follow:
 
 * querySessions(list_of_filters) -- like queryConferences, reuse _formatFilters(filters)
 
@@ -50,7 +53,9 @@ example:
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.addSessionToWishlist) to addSessionToWishlist(SessionKey)
 2. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.getSessionsInWishlist) to getSessionsInWishlist()
 
-user can only add session in the conference that user have registered to attend
+###Model Explaination
+
+There is property on profile model named sessionKeysWishlist. The property takes a list of values of the underlying type. This is a list of session keys as wishlist in user model. User can only add session in the conference that user have registered to attend.
 
 ##Task 3: Work on indexes and queries
 
@@ -83,18 +88,14 @@ Option 1, use Session property(startDateTime) as is.
                 temp.append(session)
         return temp
 ```
+The reason that the data has been filtered this way is, the datetime property of session entity does not have "hour" attribute as datetime object in python.
 
 Option 2, modify Session property, add hour property(same as month property in conference entity)
 
 ```python
         sess = Session.query()
         sess = sess.filter(Session.typeOfSession != "workshop")
-        temp = []
-        for session in sess:
-            # we assume local time
-            if session.hour < 19:
-                temp.append(session)
-        return temp
+        sess = sess.filter(Session.hour < 19)
 ```
 
 ##Task 4: Add a Task
