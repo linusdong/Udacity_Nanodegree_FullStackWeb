@@ -12,6 +12,17 @@ smart-impact-94201
 ```
 To visit the front end, Click [link](https://smart-impact-94201.appspot.com)
 
+##Change Log
+May 24th 2015, 
+* updated session data model
+* added different ResouceContainers for varies request
+* refactor some URL paths
+* added transactional method on _sessionRegistration function to prevent race condition
+* added new query getRecentConferences
+
+May 14th 2015, 
+* basic requirement completed.
+
 ##Task 1: Add Sessions to a Conference
 The session is a kind in datastore. It has the following properties:
 
@@ -64,6 +75,7 @@ There is property on profile model named sessionKeysWishlist. The property takes
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.queryConferenceSessionsByLongDuration) to queryConferenceSessionsByLongDuration(websafeConferenceKey)
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.queryConferenceSessionsByShortDuration) to queryConferenceSessionsByShortDuration(websafeConferenceKey)
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.querySessions) to querySessions (answer to query related problem)
+1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.getConferencesRecent) to getConferencesRecent
 
 ###Solve the following query related problem
 ####Question

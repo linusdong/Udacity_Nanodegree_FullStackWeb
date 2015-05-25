@@ -102,6 +102,11 @@ indexes:
 
 - kind: Session
   properties:
+  - name: duration
+  - name: name
+
+- kind: Session
+  properties:
   - name: speaker
   - name: name
 
