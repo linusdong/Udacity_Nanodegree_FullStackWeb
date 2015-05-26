@@ -82,11 +82,14 @@ There is property on profile model named sessionKeysWishlist. The property takes
 Let’s say that you don't like workshops and you don't like sessions after 7 pm. How would you handle a query for all non-workshop sessions before 7 pm? What is the problem for implementing this query? What ways to solve it did you think of?
 
 ###Problem encounter
-all session are not in the same timezone, if you assume the session time is local time, then we can treat the hour as integer, problem soloved.
+1. All session are not in the same timezone, if you assume the session time is local time, then we can treat the hour as integer, problem soloved. if the type of timestamp in each session startDateTime property is UTC, then we have to convert each UTC timestamp object to local time object(where the conference held) then compare with the value we want.
 
-if the type of timestamp in each session startDateTime property is UTC, then we have to convert each UTC timestamp object to local time object(where the conference held) then compare with the value we want.
+* The best way to deal with the problem is put valadation mechanism on front end to ensure user input is legit and inform the user input is localized.
 
-The best way to deal with the problem is put valadation mechanism on front end to ensure user input is legit and inform the user input is localized.
+1. The Datastore enforces some restrictions on queries. Violating these will cause it to raise exceptions. For example, combining too many filters, using inequalities for multiple properties, or combining an inequality with a sort order on a different property are all currently disallowed. Also filters referencing multiple properties sometimes require secondary indexes to be configured.
+
+* The workaround is equalities for multiple properties. We can look for "typeOfSession == 'lecture' AND typeOfSession == 'demo'" (assume we only and three type of session), or we can use IN operation. See Option 2 for more detail.
+
 ####Answer
 Option 1, use Session property(startDateTime) as is.
 
@@ -105,11 +108,11 @@ The reason that the data has been filtered this way is, the datetime property of
 Option 2, modify Session property, add hour property(same as month property in conference entity)
 
 ```python
+interestedSessionTypes = ["lecture", "demo"]
         sess = Session.query()
-        sess = sess.filter(Session.typeOfSession != "workshop")
+        sess = sess.filter(Session.typeOfSession.IN(interestedSessionTypes))
         sess = sess.filter(Session.hour < 19)
 ```
-
 ##Task 4: Add a Task
 
 1. [link](https://apis-explorer.appspot.com/apis-explorer/?base=https://smart-impact-94201.appspot.com/_ah/api#p/conference/v1/conference.getFeaturedSpeaker) to getFeaturedSpeaker()
