@@ -48,6 +48,7 @@ from settings import IOS_CLIENT_ID
 from settings import ANDROID_AUDIENCE
 
 from utils import getUserId
+from validation_helper import validate_conf_key
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -218,12 +219,8 @@ class ConferenceApi(remote.Service):
         data = {field.name: getattr(request, field.name) for field in request.all_fields()}
 
         # update existing conference
-        conf = ndb.Key(urlsafe=request.websafeConferenceKey).get()
-        # check that conference exists
-        if not conf:
-            raise endpoints.NotFoundException(
-                'No conference found with key: %s' % request.websafeConferenceKey)
-
+        c_key = validate_conf_key(request.websafeConferenceKey)
+        conf = c_key.get()
         # check that user is owner
         if user_id != conf.organizerUserId:
             raise endpoints.ForbiddenException(
@@ -268,10 +265,8 @@ class ConferenceApi(remote.Service):
     def getConference(self, request):
         """Return requested conference (by websafeConferenceKey)."""
         # get Conference object from request; bail if not found
-        conf = ndb.Key(urlsafe=request.websafeConferenceKey).get()
-        if not conf:
-            raise endpoints.NotFoundException(
-                'No conference found with key: %s' % request.websafeConferenceKey)
+        c_key = validate_conf_key(request.websafeConferenceKey)
+        conf = c_key.get()
         prof = conf.key.parent().get()
         # return ConferenceForm
         return self._copyConferenceToForm(conf, getattr(prof, 'displayName'))
@@ -515,31 +510,26 @@ class ConferenceApi(remote.Service):
 
     @staticmethod
     def _cacheSpeakerAnnouncement(sessionKey, speaker):
-        """Create Announcement & assign to memcache; used by
-        memcache cron job & putAnnouncement().
+        """Create Announcement & assign to memcache; this is
+        a function in taskqueue.
         """
         c_key = ndb.Key(urlsafe=sessionKey).parent()
-        if c_key is None:
-            announcement = "Error"
-            memcache.set(MEMCACHE_SPEAKER_KEY, announcement)
-            return announcement
+        if c_key is None or c_key.kind() != 'Conference':  # sessionKey error
+            # keep the current announcement, memcache unchanged
+            return
         s = Session.query(ancestor=c_key)
         s = s.filter(Session.speaker == speaker
                      ).fetch(projection=[Session.name])
         if len(s) > 1:
-            # If there is more than one session by this speaker at this conference, 
+            # If there is more than one session by this speaker at this conference,
             # also add a new Memcache entry that features the speaker and session names.
             speaker_name = "Our Featured speaker {0} ".format(speaker)
             announcement = speaker_name + SPEAKER_TPL % (
                 ', '.join(session.name for session in s))
             memcache.set(MEMCACHE_SPEAKER_KEY, announcement)
-        else:
-            # If there are no sold out conferences,
-            # delete the memcache announcements entry
-            announcement = ""
-            memcache.delete(MEMCACHE_SPEAKER_KEY)
-
-        return announcement
+            return announcement
+        # no new session match criteria, memcache unchanged
+        return
 
     @endpoints.method(message_types.VoidMessage, StringMessage,
             path='getFeaturedSpeaker',
@@ -555,16 +545,13 @@ class ConferenceApi(remote.Service):
     def _conferenceRegistration(self, request, reg=True):
         """Register or unregister user for selected conference."""
         retval = None
-        prof = self._getProfileFromUser() # get user Profile
+        prof = self._getProfileFromUser()  # get user Profile
 
         # check if conf exists given websafeConfKey
         # get conference; check that it exists
         wsck = request.websafeConferenceKey
-        conf = ndb.Key(urlsafe=wsck).get()
-        if not conf:
-            raise endpoints.NotFoundException(
-                'No conference found with key: %s' % wsck)
-
+        c_key = validate_conf_key(wsck)
+        conf = c_key.get()
         # register
         if reg:
             # check if user already registered otherwise add
@@ -639,23 +626,20 @@ class ConferenceApi(remote.Service):
         return self._conferenceRegistration(request, reg=False)
 
 
-    @endpoints.method(message_types.VoidMessage, ConferenceForms,
-            path='filterPlayground',
-            http_method='GET', name='filterPlayground')
-    def filterPlayground(self, request):
-        """Filter Playground"""
-        q = Conference.query()
-        # field = "city"
-        # operator = "="
-        # value = "London"
-        # f = ndb.query.FilterNode(field, operator, value)
-        # q = q.filter(f)
-        q = q.filter(Conference.city=="London")
-        q = q.filter(Conference.topics=="Medical Innovations")
-        q = q.filter(Conference.month==6)
-
-        return ConferenceForms(
-            items=[self._copyConferenceToForm(conf, "") for conf in q]
+    @endpoints.method(message_types.VoidMessage, SessionForms,
+            path='queryProblemSolution',
+            http_method='GET', name='queryProblemSolution')
+    def queryProblemSolution(self, request):
+        """For task 3"""
+        sess = Session.query()
+        sess = sess.filter(Session.typeOfSession != "workshop")
+        temp = []
+        for session in sess:
+            # we assume local time
+            if session.startDateTime.hour < 19:
+                temp.append(session)
+        return SessionForms(
+            items=[self._copySessionToForm(session) for session in temp]
         )
 
 
@@ -664,7 +648,7 @@ class ConferenceApi(remote.Service):
     def _sessionRegistration(self, request, reg=True):
         """Add or remove session from wishlist for selected user."""
         retval = None
-        prof = self._getProfileFromUser() # get user Profile
+        prof = self._getProfileFromUser()  # get user Profile
         # check if session exists given sessionKey
         # get session; check that it exists
         wssk = request.sessionKey
@@ -673,7 +657,10 @@ class ConferenceApi(remote.Service):
         if not c_key:
             raise endpoints.NotFoundException(
                 'No session found with key: %s' % wssk)
-
+        if c_key.kind() != 'Conference':
+            raise endpoints.BadRequestException(
+                'Please provide correct session key.\n'
+                'Error key: %s' % wssk)
         # register
         if reg:
             # check if user already registered otherwise add
@@ -708,8 +695,13 @@ class ConferenceApi(remote.Service):
         if conferenceKey:
             wsck = request.websafeConferenceKey
             c_key = ndb.Key(urlsafe=wsck)
-            # create ancestor query for all key matches for this conference
-            s = Session.query(ancestor=c_key)
+            if c_key.kind() == 'Conference':
+                # create ancestor query for all key matches for this conference
+                s = Session.query(ancestor=c_key)
+            else:
+                raise endpoints.BadRequestException(
+                    "Could not return session query.\n"
+                    "conference key: %s" % wsck)
         else:
             s = Session.query()
         try:
@@ -741,7 +733,7 @@ class ConferenceApi(remote.Service):
         for field in sf.all_fields():
             if hasattr(session, field.name):
                 # convert Date and Time to date string; just copy others
-                if field.name.endswith('Date') or field.name.endswith('Time'):
+                if field.name == "startDateTime":
                     setattr(sf, field.name, str(getattr(session, field.name)))
                 else:
                     setattr(sf, field.name, getattr(session, field.name))
@@ -754,20 +746,14 @@ class ConferenceApi(remote.Service):
         return sf
 
     def _createSessionObject(self, request):
-        """Create or update Session object, returning SessionForm/request."""
-        # preload necessary data items
+        """Create Session object, returning SessionForm/request."""
+        # check user, if no user, raise exception
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
         user_id = getUserId(user)
-
-        wsck = request.websafeConferenceKey
-
-        conf = ndb.Key(urlsafe=wsck).get()
-        # check that conference exists
-        if not conf:
-            raise endpoints.NotFoundException(
-                'No conference found with key: %s' % wsck)
+        c_key = validate_conf_key(request.websafeConferenceKey)
+        conf = c_key.get()
         # check that user is owner
         if user_id != conf.organizerUserId:
             raise endpoints.ForbiddenException(
@@ -795,7 +781,7 @@ class ConferenceApi(remote.Service):
                 data['startDateTime'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # generate Profile Key based on user ID and Session
         # ID based on Profile key get Session key from ID
-        c_key = ndb.Key(urlsafe=wsck)
+        c_key = ndb.Key(urlsafe=request.websafeConferenceKey)
         s_id = Session.allocate_ids(size=1, parent=c_key)[0]
         s_key = ndb.Key(Session, s_id, parent=c_key)
         data['key'] = s_key
