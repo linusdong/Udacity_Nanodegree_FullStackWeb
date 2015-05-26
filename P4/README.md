@@ -13,6 +13,10 @@ smart-impact-94201
 To visit the front end, Click [link](https://smart-impact-94201.appspot.com)
 
 ##Change Log
+May 25th 2015,
+* add checking function to make sure urlsafe_key is conference key
+* add validation_helper.py
+
 May 24th 2015, 
 * updated session data model
 * added different ResouceContainers for varies request
